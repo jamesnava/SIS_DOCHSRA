@@ -1,0 +1,50 @@
+#creando tabla oficina
+CREATE TABLE OFICINA(Id_Oficina VARCHAR(5),
+Oficina VARCHAR(200),
+Ofi_Descripcion VARCHAR(300),
+PRIMARY KEY(Id_Oficina))
+
+#creando tabla usuario
+CREATE TABLE USUARIO(dni VARCHAR(10),
+Nombre VARCHAR(50),
+Apellidos VARCHAR(100),
+Usuario VARCHAR(15),
+Contrasenia VARCHAR(300),
+PRIMARY KEY(dni),
+Id_Oficina VARCHAR(5),
+FOREIGN KEY (Id_Oficina) REFERENCES OFICINA(Id_Oficina) 
+)
+
+#creando la tabla pedidos
+
+CREATE TABLE PEDIDO(cod_Pedido VARCHAR(5),
+Nro_Pedido VARCHAR(6),
+Descripcion VARCHAR(50),
+Tipo VARCHAR(10),
+Fecha DATE,
+Oficina VARCHAR(5),
+dni VARCHAR(10),
+PRIMARY KEY (cod_Pedido),
+FOREIGN KEY (dni) REFERENCES USUARIO(dni)
+)
+
+#creando estados
+CREATE TABLE ESTADO(
+Id_Estado INT IDENTITY(1,1),
+Estado VARCHAR(20)
+PRIMARY KEY (Id_Estado)
+)
+
+# creando la tabla accion
+CREATE TABLE ACCION(Id_Accion INT IDENTITY (1,1),
+Nro_Pedido VARCHAR(6),
+Fecha DATETIME,
+Usuario VARCHAR(10),
+Observacion VARCHAR(100),
+Id_Estado INT,
+Id_Oficina VARCHAR(5),
+PRIMARY (KEY Id_Accion),
+FOREIGN KEY (Id_Estado) REFERENCES ESTADO(Id_Estado),
+FOREIGN KEY(Nro_Pedido) REFERENCES PEDIDO(Nro_Pedido),
+FOREIGN KEY(Id_Oficina) REFERENCES OFICINA(Id_Oficina)
+)
