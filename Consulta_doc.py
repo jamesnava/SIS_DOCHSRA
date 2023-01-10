@@ -20,5 +20,12 @@ class querys(object):
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
+	def query_tablas(self,tabla):
+		rows=[]
+		sql=f"""SELECT * FROM {tabla}"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+
 
 
