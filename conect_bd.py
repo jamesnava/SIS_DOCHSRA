@@ -2,7 +2,7 @@ import pyodbc
 from tkinter import messagebox
 import configparser
 
-class Conexion_Triaje(object):
+class Conexion(object):
 	def __init__(self):
 		self.configuracion=configparser.ConfigParser()
 		self.configuracion.read('config_sisdoc.ini')
