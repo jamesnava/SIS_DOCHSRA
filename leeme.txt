@@ -1,0 +1,7 @@
+El estado se tiene que llenar en el siguiente orden
+::::::::::::::::::::::::::::::::::::::::::
+Id_Estado	Estado
+1		RECIBIDO
+2		DERIVADO
+3		ATENDIDO
+4		RECHAZADO

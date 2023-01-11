@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import GUI_User
 import documentos
+import Consulta_doc
 
 
 class Ventana_Principal(object):
@@ -36,8 +37,8 @@ class Ventana_Principal(object):
 		# creando menu Acciones
 		self.M_Acciones=Menu(self.Barra_Menu,tearoff=False)
 		self.M_Acciones.add_command(label='Generar Documento',command=self.M_GenerarDocumento)
-		self.M_Acciones.add_command(label='Bandeja de Entrada')
-		self.M_Acciones.add_command(label='Documentos a Derivar')
+		self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)
+		self.M_Acciones.add_command(label='Seguimiento')
 		self.M_Acciones.add_separator()		
 		self.Barra_Menu.add_cascade(label='Documentos',menu=self.M_Acciones)
 
@@ -55,6 +56,10 @@ class Ventana_Principal(object):
 		self.Barra_Menu.add_cascade(label='Perfil de Usuario',menu=self.M_Usuario)
 		self.agregar_bottom()
 
+	def Return_Office(self):
+		obj_consulta=Consulta_doc.querys()
+		rows=obj_consulta.query_OficinaMUser(self.usuario)
+		return rows[0].Id_Oficina,rows[0].dni
 
 	def agregar_bottom(self):		
 		self.Frame_Bottom=Frame(self.ventana,bg='#647B7B',width=self.width,height=int(self.height*0.03))
@@ -65,11 +70,20 @@ class Ventana_Principal(object):
 		etiqueta_UsuarioValor.grid(row=0,column=1)
 
 	def M_GenerarDocumento(self):
-		self.Frame_Documentos=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.6),height=int(self.height*0.6),highlightthickness=5)
-		self.Frame_Documentos.place(x=int(self.width*0.5)-int((self.width*0.6)/2),y=int(self.height*0.08))
+		#647B7B
+		self.Frame_Documentos=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
+		self.Frame_Documentos.place(x=10,y=10)
 		self.Frame_Documentos.grid_propagate(False)
 		obj_Documentos=documentos.Documentos()
-		obj_Documentos.Generar_Documentos(self.Frame_Documentos,self.width,self.height)
+		obj_Documentos.Generar_Documentos(self.Frame_Documentos,self.width,self.height,self.usuario)
+
+	def bandeja_Entrada(self):
+		oficina,usuario=self.Return_Office()
+		self.Frame_Bandeja=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
+		self.Frame_Bandeja.place(x=10,y=10)
+		self.Frame_Bandeja.grid_propagate(False)
+		obj_Documentos=documentos.Bandeja(oficina,usuario)
+		obj_Documentos.BandejaEntrada(self.Frame_Bandeja,self.width,self.height)
 
 
 		
