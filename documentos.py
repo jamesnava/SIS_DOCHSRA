@@ -198,9 +198,11 @@ class Documentos():
 
 class Bandeja():
 	def __init__(self,oficina,dniUser):
+		self.fecha_Actual=datetime.now()
 		self.oficina=oficina
 		self.dniUser=dniUser
 		self.obj_consulta=Consulta_doc.querys()
+		self.letra1=('Comic Sans MS',12,'bold')
 	def BandejaEntrada(self,frame,width,height):
 		letra=('Segoe Script',12,'bold')
 		self.Frame_Docs=Frame(frame,bg='#647B7B',width=int(width*0.98),height=int(height*0.92))
@@ -209,20 +211,21 @@ class Bandeja():
 		etiqueta=Label(self.Frame_Docs,text='DOCUMENTOS POR RECEPCIONAR',width=int(width*0.1),font=letra)
 		etiqueta.place(x=0,y=10)
 		self.table_Recepcionar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5'),show='headings')				
-		self.table_Recepcionar.heading("#1",text="CODIGO")
-		self.table_Recepcionar.column("#1",width=60,anchor="w")
-		self.table_Recepcionar.heading("#2",text="NRO DOC")
-		self.table_Recepcionar.column("#2",width=50,anchor="w")
-		self.table_Recepcionar.heading("#3",text="DESCRIPCION")
-		self.table_Recepcionar.column("#3",width=400,anchor="w")
-		self.table_Recepcionar.heading("#4",text="TIPO")
-		self.table_Recepcionar.column("#4",width=100,anchor="w")
-		self.table_Recepcionar.heading("#5",text="REMITENTE")
-		self.table_Recepcionar.column("#5",width=200,anchor="w")
+		self.table_Recepcionar.heading("#1",text="Nro")
+		self.table_Recepcionar.column("#1",width=1,anchor="w")
+		self.table_Recepcionar.heading("#2",text="CODIGO")
+		self.table_Recepcionar.column("#2",width=60,anchor="w")
+		self.table_Recepcionar.heading("#3",text="NRO DOC")
+		self.table_Recepcionar.column("#3",width=50,anchor="w")
+		self.table_Recepcionar.heading("#4",text="DESCRIPCION")
+		self.table_Recepcionar.column("#4",width=400,anchor="w")
+		self.table_Recepcionar.heading("#5",text="TIPO")
+		self.table_Recepcionar.column("#5",width=100,anchor="w")
+		
 		self.table_Recepcionar.place(x=int(width*0.03),y=60,width=int(width*0.7),height=220)
 		self.llenar_TablaRecepcionar()
 		btn_AccionR=Button(self.Frame_Docs,text="Accion")
-		btn_AccionR['command']=self.Top_Accion
+		btn_AccionR['command']=self.Recepcionar
 		btn_AccionR.place(x=int(width*0.3),y=300)
 
 
@@ -230,32 +233,246 @@ class Bandeja():
 		etiqueta=Label(self.Frame_Docs,text='DOCUMENTOS POR ATENDER',width=int(width*0.1),font=letra)
 		etiqueta.place(x=0,y=int(height*0.5))
 
-		self.table_Derivar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4'),show='headings')				
-		self.table_Derivar.heading("#1",text="NRO DOC")
-		self.table_Derivar.column("#1",width=60,anchor="w")
-		self.table_Derivar.heading("#2",text="DESCRIPCION")
-		self.table_Derivar.column("#2",width=320,anchor="w")
-		self.table_Derivar.heading("#3",text="TIPO")
-		self.table_Derivar.column("#3",width=100,anchor="w")
-		self.table_Derivar.heading("#4",text="REMITENTE")
+		self.table_Derivar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5'),show='headings')				
+		
+		self.table_Derivar.heading("#1",text="Nro")
+		self.table_Derivar.column("#1",width=10,anchor="w")
+		self.table_Derivar.heading("#2",text="CODIGO")
+		self.table_Derivar.column("#2",width=60,anchor="w")
+		self.table_Derivar.heading("#3",text="NRO DOC")
+		self.table_Derivar.column("#3",width=60,anchor="w")
+		self.table_Derivar.heading("#4",text="DESCRIPCION")
 		self.table_Derivar.column("#4",width=320,anchor="w")
-		self.table_Derivar.place(x=int(width*0.03),y=int(height*0.55),width=int(width*0.6),height=220)
+		self.table_Derivar.heading("#5",text="TIPO")
+		self.table_Derivar.column("#5",width=100,anchor="w")		
+		self.table_Derivar.place(x=int(width*0.03),y=int(height*0.55),width=int(width*0.7),height=220)
+		self.llenar_TablaDerivar()
 
 		btn_AccionD=Button(self.Frame_Docs,text="Accion")
+		btn_AccionD['command']=self.Top_Atencion
 		btn_AccionD.place(x=int(width*0.3),y=int(height*0.8))
 
 	def llenar_TablaRecepcionar(self):
-		rows=self.obj_consulta.query_Recepcionar(self.oficina)		
+		rows=self.obj_consulta.query_DocXEstado(self.oficina,2)		
+		for valor in rows:			
+			self.table_Recepcionar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Nro_Pedido,valor.Descripcion,valor.Tipo))
+
+
+	def llenar_TablaDerivar(self):
+		self.delete_table(self.table_Derivar)
+		rows=self.obj_consulta.query_DocXEstado(self.oficina,1)		
 		for valor in rows:
-			self.table_Recepcionar.insert('','end',values=(valor.Cod_Pedido,valor.Nro_Pedido,valor.Descripcion,valor.Tipo,valor.Oficina))
-
-	def Top_Accion(self):
-		self.TopAccion=Toplevel()
-		self.TopAccion.geometry('400x400')
-		self.TopAccion.title('Realizar Accion')
-		self.TopAccion.grab_set()
+			rows_Oficina=self.obj_consulta.query_RetornaCodigo('OFICINA',valor.Oficina,'Id_Oficina','Oficina')
+			self.table_Derivar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Nro_Pedido,valor.Descripcion,valor.Tipo,rows_Oficina[0].Oficina))
 
 
+	def delete_table(self,table):
+		for item in table.get_children():
+			table.delete(item)
+	def Recepcionar(self):
+		if self.table_Recepcionar.selection():
+			codigo=self.table_Recepcionar.item(self.table_Recepcionar.selection()[0])['values'][0]
+			self.obj_consulta.Update_TableEstadoAccion(codigo,1)			
+			messagebox.showinfo('Notificación','El documento se recepcionó!!')
+			self.delete_table(self.table_Recepcionar)
+			self.llenar_TablaRecepcionar()
+			self.llenar_TablaDerivar()
+
+		else:
+			messagebox.showinfo('Alerta','Seleccione un Item')
+
+	def Top_Atencion(self):
+
+		if self.table_Derivar.selection():
+			codigo_A,codigo_pedido=self.table_Derivar.item(self.table_Derivar.selection()[0])['values'][0],self.table_Derivar.item(self.table_Derivar.selection()[0])['values'][1]
+			
+			rows=self.obj_consulta.query_PedidoAccion(codigo_pedido,codigo_A)			
+
+			self.TopAccion=Toplevel()
+			self.TopAccion.geometry('500x400')
+			self.TopAccion.title('Realizar Atencion')
+			self.TopAccion.grab_set()
+			self.TopAccion.resizable(0,0)
+
+			etiqueta=Label(self.TopAccion,text='Nro: ',font=self.letra1)
+			etiqueta.grid(row=1,column=2,pady=8,padx=5,sticky='e')
+			self.Entry_nro=Entry(self.TopAccion,width=40)
+			self.Entry_nro.insert('end',rows[0].Id_Accion)
+			self.Entry_nro['state']='readonly'
+			self.Entry_nro.grid(row=1,column=3,ipady=3)
+
+			etiqueta=Label(self.TopAccion,text='Codigo: ',font=self.letra1)
+			etiqueta.grid(row=2,column=2,pady=8,padx=5,sticky='e')
+			self.Entry_RCodigo=Entry(self.TopAccion,width=40)
+			self.Entry_RCodigo.insert('end',rows[0].Cod_Pedido)
+			self.Entry_RCodigo['state']='readonly'
+			self.Entry_RCodigo.grid(row=2,column=3,ipady=3)
+
+			etiqueta=Label(self.TopAccion,text='Nro Doc: ',font=self.letra1)
+			etiqueta.grid(row=3,column=2,pady=8,padx=5,sticky='e')
+			self.Entry_RNorDoc=Entry(self.TopAccion,width=40)
+			self.Entry_RNorDoc.insert('end',rows[0].Nro_Pedido)
+			self.Entry_RNorDoc['state']='readonly'
+			self.Entry_RNorDoc.grid(row=3,column=3,ipady=3)
+
+			etiqueta=Label(self.TopAccion,text='Documento: ',font=self.letra1)
+			etiqueta.grid(row=4,column=2,pady=8,padx=5,sticky='e')
+			self.Entry_RPedido=Entry(self.TopAccion,width=40)
+			self.Entry_RPedido.insert('end',rows[0].Descripcion)
+			self.Entry_RPedido['state']='readonly'
+			self.Entry_RPedido.grid(row=4,column=3,ipady=3)
+
+			etiqueta=Label(self.TopAccion,text='Actividad: ',font=self.letra1)
+			etiqueta.grid(row=5,column=2,pady=8,padx=5,sticky='e')
+			self.Lista_Actividad=ttk.Combobox(self.TopAccion,width=35)
+			EstadoRows=self.obj_consulta.query_tabla('ESTADO')
+			self.llenarLista(self.Lista_Actividad,EstadoRows)
+			self.Lista_Actividad.current(1)
+			self.Lista_Actividad.bind("<<ComboboxSelected>>",self.evento_listaA)
+			self.Lista_Actividad.grid(row=5,column=3,ipady=3)
+
+			etiqueta=Label(self.TopAccion,text='Motivo: ',font=self.letra1)
+			etiqueta.grid(row=6,column=2,pady=8,padx=5,sticky='e')
+			self.Entry_RDescripcionPedido=Text(self.TopAccion,width=37,height=6)
+			self.Entry_RDescripcionPedido.grid(row=6,column=3)			
+
+			etiqueta=Label(self.TopAccion,text='Remitir A: ',font=self.letra1)
+			etiqueta.grid(row=7,column=2,pady=8,padx=5,sticky='e')
+			self.Lista_ROficina=ttk.Combobox(self.TopAccion,width=35)
+			self.Lista_ROficina.grid(row=7,column=3,ipady=3)
+
+			btn_AccionR=Button(self.TopAccion,text="Aceptar")
+			btn_AccionR['command']=self.Derivar_Doc
+			btn_AccionR.grid(row=8,column=1,padx=10,pady=10,sticky='e')
+
+			btn_AccionCancelar=Button(self.TopAccion,text="Cancelar")
+			#btn_AccionR['command']=self.Top_Atencion
+			btn_AccionCancelar.grid(row=8,column=3,columnspan=2,padx=10,pady=10,sticky='e')
+			
+		else:
+			messagebox.showerror('Alerta','Seleccione un item')
+
+	def llenarLista(self,lista,rows):
+		listado=[]
+		for valor in rows:
+			listado.append(valor.Estado)
+		lista['values']=listado
+
+	def evento_listaA(self,event):
+		actividad=self.Lista_Actividad.get()
+		if actividad=='ATENDIDO' or actividad=='RECIBIDO':
+			self.Lista_ROficina['state']='disabled'
+		else:
+			self.Lista_ROficina['state']='normal'
+			rowsO=self.obj_consulta.query_tabla('OFICINA')
+			ListOficina=[]
+			for valor in rowsO:
+				ListOficina.append(valor.Oficina)
+			self.Lista_ROficina['values']=ListOficina
+	
+	def Derivar_Doc(self):
+		valores=[]
+		self.Entry_RCodigo['state']='normal'
+		codigo_pedido=self.Entry_RCodigo.get()
+		valores.append(codigo_pedido)		
+
+		fecha=self.fecha_Actual.strftime("%d-%m-%Y")
+		valores.append(fecha)
+		valores.append(self.dniUser)
+
+		Descripcion=self.Entry_RDescripcionPedido.get('1.0','end-1c')
+		valores.append(Descripcion)
+
+		#obteniendo el estado.
+		Estado=self.Lista_Actividad.get()
+		idEstado=self.obj_consulta.query_Tabla1Condicion('ESTADO','Estado',Estado)[0].Id_Estado
+		
+		if idEstado!=1:
+			valores.append(idEstado)
+			id_oficina='X'
+			if Estado=='ATENDIDO' or Estado=='RECIBIDO':
+				id_oficina=self.oficina
+			else:			
+				id_oficina=self.obj_consulta.query_Tabla1Condicion('OFICINA','Oficina',self.Lista_ROficina.get())[0].Id_Oficina
+			
+			valores.append(id_oficina)
+			valores.append(0)
+			anio=self.fecha_Actual.strftime("%Y")
+			valores.append(anio)
+			
+			#insertando accion
+			self.obj_consulta.Insert_Accion(valores)
+			self.Entry_nro['state']='normal'
+			id_Accion=self.Entry_nro.get()
+			#hereeeeeee....!!
+			self.obj_consulta.Update_AccionOtros(id_Accion)
+			messagebox.showinfo('Notificación','Exitoso!!')
+			self.llenar_TablaDerivar()
+
+		else:
+			messagebox.showerror('Alerta','No se puede Recepcionar el documento en este Modulo!!')
+		self.TopAccion.destroy()
+
+class Seguimiento():
+
+	def __init__(self,oficina,usuario):		
+		self.oficina=oficina
+		self.usuario=usuario
+		self.obj_consulta=Consulta_doc.querys()
+	def Seguimiento(self,frame,width,height):
+		letra=('Comic Sans MS',12,'bold')
+		self.width=width
+		self.height=height
+		#647B7B
+		self.Frame_Docs=Frame(frame,bg='blue',width=int(width*0.6),height=int(height*0.6))
+		self.Frame_Docs.place(x=int(self.width*0.5)-int((self.width*0.6)/2),y=int(self.height*0.05))
+		self.Frame_Docs.grid_propagate(False)
+
+		etiqueta=Label(self.Frame_Docs,text='Nro Documento: ',font=letra,bg='#647B7B')
+		etiqueta.grid(row=0,column=1,pady=8,padx=5,sticky='e')
+		self.Entry_NroDoc=Entry(self.Frame_Docs,width=40)		
+		self.Entry_NroDoc.grid(row=0,column=2,ipady=3)
+
+		etiqueta=Label(self.Frame_Docs,text='Tipo: ',bg='#647B7B',font=letra)
+		etiqueta.grid(row=0,column=3,pady=8,padx=5,sticky='e')
+		self.List_Tipo=ttk.Combobox(self.Frame_Docs,width=40)
+		self.List_Tipo['values']=['SERVICIO','BIEN','DOCUMENTO']		
+		self.List_Tipo.grid(row=0,column=4,ipady=3)					
+
+		btn_Aceptar=Button(self.Frame_Docs,text='Buscar',width=20)
+		btn_Aceptar['command']=self.event_Seguimiento	
+		btn_Aceptar.grid(row=7,column=2,columnspan=2,padx=10,pady=10,sticky='e')
+
+
+		self.table_Seguimiento=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6'),show='headings')	
+		self.table_Seguimiento.heading("#1",text="Nro Doc")
+		self.table_Seguimiento.column("#1",width=10,anchor="w")
+		self.table_Seguimiento.heading("#2",text="Descripcion")
+		self.table_Seguimiento.column("#2",width=200,anchor="w")
+		self.table_Seguimiento.heading("#3",text="Tipo de Doc")
+		self.table_Seguimiento.column("#3",width=100,anchor="w")
+		self.table_Seguimiento.heading("#4",text="Oficina")
+		self.table_Seguimiento.column("#4",width=200,anchor="w")
+		self.table_Seguimiento.heading("#5",text="Estado")
+		self.table_Seguimiento.column("#5",width=80,anchor="w")
+		self.table_Seguimiento.heading("#6",text="Fecha Movimiento")
+		self.table_Seguimiento.column("#6",width=60,anchor="w")				
+		self.table_Seguimiento.place(x=int(width*0.03),y=int(self.height*0.1),width=int(width*0.55),height=220)
+
+	def event_Seguimiento(self):
+		self.delete_table(self.table_Seguimiento)
+		Nro_Documento=self.Entry_NroDoc.get()
+		Tipo=self.List_Tipo.get()
+		rows=self.obj_consulta.query_Seguimiento(Nro_Documento,Tipo,self.oficina)
+
+		for valor in rows:
+			estado=self.obj_consulta.query_RetornaCodigo('ESTADO',valor.Id_Estado,'Id_Estado','Estado')
+			ofi=self.obj_consulta.query_RetornaCodigo('OFICINA',valor.Id_Oficina,'Id_Oficina','Oficina')
+			self.table_Seguimiento.insert('','end',values=(valor.Nro_Pedido,valor.Descripcion,Tipo,ofi[0].Oficina,estado[0].Estado,valor.Presentado))
+
+	def delete_table(self,table):
+		for item in table.get_children():
+			table.delete(item)
 
 
 		
@@ -263,4 +480,4 @@ class Bandeja():
 
 
 
-
+	

@@ -20,6 +20,24 @@ class querys(object):
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
+	#para recepcion
+	def Update_TableEstadoAccion(self,codigo,estado):
+		sql=f"""UPDATE ACCION SET Id_Estado={estado} WHERE Id_Accion='{codigo}'"""
+		self.cursor.execute(sql)
+		self.cursor.commit()
+	#para derivar o atender o rechazar
+	def Update_AccionOtros(self,codigo):
+		sql=f"""UPDATE ACCION SET Manejador=1 WHERE Id_Accion='{codigo}'"""
+		self.cursor.execute(sql)
+		self.cursor.commit()
+
+	def query_Tabla1Condicion(self,tabla,columna,codicion):
+		rows=[]
+		sql=f"""SELECT * FROM {tabla} WHERE {columna}='{codicion}'"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+
 	def query_RetornaCodigo(self,tabla,codigo,columna,retorna):
 		rows=[]
 		sql=f"""SELECT {retorna} FROM {tabla} WHERE {columna}='{codigo}'"""
@@ -55,6 +73,8 @@ class querys(object):
 		sql=f"""INSERT INTO ACCION VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}')"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
+	
+
 	def query_OficinaMUser(self,usuario):
 		rows=[]
 		sql=f"""SELECT * FROM USUARIO AS US INNER JOIN OFICINA AS O ON US.Id_Oficina=O.Id_Oficina AND US.Usuario='{usuario}'"""
@@ -62,13 +82,39 @@ class querys(object):
 		rows=self.cursor.fetchall()
 		return rows
 
-	def query_Recepcionar(self,idoficina):
+	def query_DocXEstado(self,idoficina,estado):
 		rows=[]
-		sql=f"""SELECT A.Cod_Pedido,P.Nro_Pedido,P.Descripcion,P.Tipo,P.Oficina FROM ACCION AS A INNER JOIN
-		 PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido AND A.Id_Oficina='{idoficina}' AND A.Id_Estado=2"""
+		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Descripcion,P.Tipo,P.Oficina FROM ACCION AS A INNER JOIN
+		 PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido AND A.Id_Oficina='{idoficina}' AND A.Id_Estado={estado} AND A.Manejador=0"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
+
+	def query_PedidoAccion(self,codigoPedido,id_Accion):
+		rows=[]
+		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Descripcion,P.Tipo,P.Oficina FROM ACCION AS A INNER JOIN
+		 PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido AND A.Cod_Pedido='{codigoPedido}' AND A.Id_Accion={id_Accion}"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+
+	def query_tabla(self,tabla):
+		rows=[]
+		sql=f"""SELECT * FROM {tabla}"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+
+	def query_Seguimiento(self,nroPedido,Tipo,Oficina):
+		
+		rows=[]
+		sql=f"""SELECT P.Nro_Pedido,P.Descripcion,A.Fecha,A.Id_Estado,A.Id_Oficina,P.Fecha AS Presentado 
+		FROM PEDIDO AS P INNER JOIN ACCION as A ON P.cod_Pedido=A.Cod_Pedido AND P.Nro_Pedido={nroPedido} AND P.Tipo='{Tipo}' 
+		AND P.Oficina='{Oficina}'"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+
 
 
 
