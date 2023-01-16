@@ -29,6 +29,7 @@ class Ventana_Principal(object):
 		self.ventana['menu']=self.Barra_Menu
 		#creando menu configuracion
 		self.M_Configuracion=Menu(self.Barra_Menu,tearoff=False)
+		self.M_Configuracion.add_command(label='Restablecer Contraseña',command=self.Cambiar_Contrasenia)
 		self.M_Configuracion.add_command(label='Minimizar',command=self.ventana.iconify)
 		self.M_Configuracion.add_command(label='Cerrar',command=self.ventana.destroy)
 		self.M_Configuracion.add_separator()		
@@ -38,22 +39,19 @@ class Ventana_Principal(object):
 		self.M_Acciones=Menu(self.Barra_Menu,tearoff=False)
 		self.M_Acciones.add_command(label='Generar Documento',command=self.M_GenerarDocumento)
 		self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)
+		
 		self.M_Acciones.add_command(label='Seguimiento',command=self.Seguimiento_Documentario)
 		self.M_Acciones.add_separator()		
 		self.Barra_Menu.add_cascade(label='Documentos',menu=self.M_Acciones)
+				
+		#Ayuda...
+		self.M_Ayuda=Menu(self.Barra_Menu,tearoff=False)
+		self.M_Ayuda.add_command(label='Acerca de...',command=self.acercade)
+		self.M_Ayuda.add_command(label='Desarrollado por...', command=self.autor)		
+		self.M_Ayuda.add_separator()		
+		self.Barra_Menu.add_cascade(label='Ayuda',menu=self.M_Ayuda)
 
-		#Creando oficinas
 
-		self.M_Oficina=Menu(self.Barra_Menu,tearoff=False)
-		self.M_Oficina.add_command(label='Agregar Nueva Oficina')		
-		self.M_Oficina.add_separator()		
-		self.Barra_Menu.add_cascade(label='Oficina',menu=self.M_Oficina)
-
-		#Pefil de Usuariio
-		self.M_Usuario=Menu(self.Barra_Menu,tearoff=False)
-		self.M_Usuario.add_command(label='Agregar Nuevo Usuario')		
-		self.M_Usuario.add_separator()		
-		self.Barra_Menu.add_cascade(label='Perfil de Usuario',menu=self.M_Usuario)
 		self.agregar_bottom()
 
 	def Return_Office(self):
@@ -70,11 +68,12 @@ class Ventana_Principal(object):
 		etiqueta_UsuarioValor.grid(row=0,column=1)
 
 	def M_GenerarDocumento(self):
+		oficina,usuario=self.Return_Office()
 		#647B7B
 		self.Frame_Documentos=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
 		self.Frame_Documentos.place(x=10,y=10)
 		self.Frame_Documentos.grid_propagate(False)
-		obj_Documentos=documentos.Documentos()
+		obj_Documentos=documentos.Documentos(oficina,usuario)
 		obj_Documentos.Generar_Documentos(self.Frame_Documentos,self.width,self.height,self.usuario)
 
 	def bandeja_Entrada(self):
@@ -82,7 +81,7 @@ class Ventana_Principal(object):
 		self.Frame_Bandeja=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
 		self.Frame_Bandeja.place(x=10,y=10)
 		self.Frame_Bandeja.grid_propagate(False)
-		obj_Documentos=documentos.Bandeja(oficina,usuario)
+		obj_Documentos=documentos.Bandeja(oficina,usuario,self.ventana)
 		obj_Documentos.BandejaEntrada(self.Frame_Bandeja,self.width,self.height)
 
 	def Seguimiento_Documentario(self):
@@ -92,6 +91,50 @@ class Ventana_Principal(object):
 		self.Frame_Bandeja.grid_propagate(False)
 		obj_Documentos=documentos.Seguimiento(oficina,usuario)
 		obj_Documentos.Seguimiento(self.Frame_Bandeja,self.width,self.height)
+
+	def Cambiar_Contrasenia(self):
+		Top_Contrasenia=Toplevel(self.ventana)
+		Top_Contrasenia.geometry('400x200')
+		Top_Contrasenia.resizable(0,0)
+		Top_Contrasenia.grab_set()
+		Top_Contrasenia.title("Cambiar Contraseña")
+		etiqueta=Label(Top_Contrasenia,text='Contraseña Actual')
+		etiqueta.grid(row=1,column=1,pady=10,padx=10)
+		text_contraActual=Entry(Top_Contrasenia,show='*')
+		text_contraActual.grid(row=1,column=2,pady=10,padx=10)
+		etiqueta=Label(Top_Contrasenia,text='Contraseña Nueva')
+		etiqueta.grid(row=2,column=1,pady=10,padx=10)
+		text_contraNueva=Entry(Top_Contrasenia,show='*')
+		text_contraNueva.grid(row=2,column=2,pady=10,padx=10)
+
+		btn_AceptarC=Button(Top_Contrasenia,text='Aceptar')
+		btn_AceptarC['command']=lambda :self.UpdatePass(self.usuario,text_contraActual.get(),text_contraNueva.get(),Top_Contrasenia)
+		btn_AceptarC.grid(row=3,column=1,pady=10,padx=10)
+
+		btn_CancelarC=Button(Top_Contrasenia,text='Cancelar')
+		btn_CancelarC['command']=Top_Contrasenia.destroy
+		btn_CancelarC.grid(row=3,column=2,pady=10,padx=10)
+	def UpdatePass(self,usuario,contraA,contraN,Top_Contrasenia):
+		obj_querys=Consulta_doc.querys()
+
+		try:			
+			rows=obj_querys.query_RetornaCodigo('USUARIO',contraA,'Contrasenia','Contrasenia')
+			if len(rows)!=0:
+				obj_querys.Update_Pass(usuario,contraA,contraN)
+				messagebox.showinfo('Alerta','Se cambio correctamente!')
+				Top_Contrasenia.destroy()
+				self.ventana.destroy()
+			else:
+				messagebox.showinfo('Alerta','La contraseña Actual no Corresponde')
+		except Exception as e:
+			messagebox.showerror('Error',e)
+
+	def acercade(self):
+		messagebox.showinfo('informacion del software',"""Sistema de seguimiento documentario, version 1.0""")
+	def autor(sel):
+		messagebox.showinfo('Desarrollado por',"""El sistema de seguimiento documentario fue desarrollado por la\nUNIDAD DE ESTADISTICA E INFORMATICA a través de la oficina de\nDESARROLLO DE SOFTWARE del Hospital Sub Regional de Andahuaylas\nTodos los derechos reservado ®2023\nby JAIME NAVARRO CRUZ- navarrocruzjaime@gmail.com""")
+
+
 
 
 

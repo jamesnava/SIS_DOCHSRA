@@ -5,14 +5,16 @@ import generales
 import Consulta_doc
 from datetime import datetime
 class Documentos():
-	def __init__(self):
+	def __init__(self,oficina,usuario):
+		self.oficinaG=oficina
+		self.usuarioG=usuario
 		self.fecha_Actual=datetime.now()
 		self.obj_consultas=Consulta_doc.querys()	
 	def Generar_Documentos(self,frame,width,height,Usuario):
 		letra=('Comic Sans MS',12,'bold')
 		self.width=width
 		self.height=height
-		self.Frame_Docs=Frame(frame,bg='#647B7B',width=int(width*0.6),height=int(height*0.6))
+		self.Frame_Docs=Frame(frame,bg='#647B7B',width=int(width*0.6),height=int(height*0.7))
 		self.Frame_Docs.place(x=int(self.width*0.5)-int((self.width*0.6)/2),y=int(self.height*0.08))
 		self.Frame_Docs.grid_propagate(False)
 
@@ -73,16 +75,42 @@ class Documentos():
 		self.Entry_OficinaG.insert('end',self.Recuperar_OficinaGeneradora(Usuario))
 
 		self.Entry_OficinaG['state']='readonly'
-		self.Entry_OficinaG.grid(row=6,column=4,ipady=3)
+		self.Entry_OficinaG.grid(row=6,column=4,ipady=3)		
 
-		btn_Aceptar=Button(self.Frame_Docs,text='Aceptar',width=20)
+		btn_Aceptar=ttk.Button(self.Frame_Docs,text='Aceptar',width=20,cursor="hand2")
 		btn_Aceptar['command']=self.Insertar_Pedido
 		btn_Aceptar.grid(row=7,column=1,columnspan=2,padx=10,pady=10,sticky='e')
 
-		btn_Cancelar=Button(self.Frame_Docs,text='Cancelar',width=20)
+		btn_Cancelar=ttk.Button(self.Frame_Docs,text='Cancelar',width=20,cursor='hand2')
 		btn_Cancelar['command']=self.Capa
 		btn_Cancelar.grid(row=7,column=3,columnspan=2,pady=10,padx=10,sticky='e')
 
+		################## AGREGANDO  LISTA DE PEDIDOS #######################
+		s=ttk.Style()
+		s.configure("model.Treeview",background="#1099B5")
+
+		etiqueta=Label(self.Frame_Docs,text="LISTA DE DOCUMENTOS",bg='#647B7B',fg="#1B3A71",font=('Comic Sans MS',18,'bold'))
+		etiqueta.grid(row=8,column=1,pady=10,columnspan=4)
+
+		self.table_Documentos=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5'),show='headings',style="model.Treeview")
+
+		self.table_Documentos.heading("#1",text="Nro")
+		self.table_Documentos.column("#1",width=10,anchor="w")
+		self.table_Documentos.heading("#2",text="CODIGO")
+		self.table_Documentos.column("#2",width=80,anchor="w")
+		self.table_Documentos.heading("#3",text="NRO DOC")
+		self.table_Documentos.column("#3",width=80,anchor="w")
+		self.table_Documentos.heading("#4",text="Descripcion")
+		self.table_Documentos.column("#4",width=400,anchor="w")
+		self.table_Documentos.heading("#5",text="Derivado a")
+		self.table_Documentos.column("#5",width=200,anchor="w")	
+		self.table_Documentos.grid(row=9,column=1,columnspan=4,rowspan=2,pady=10)
+		self.llenar_tableDocumentos()
+
+		btn_UpDoc=ttk.Button(self.Frame_Docs,text='Eliminar',width=20,cursor="hand2")
+		btn_UpDoc['command']=self.eliminar_Documento
+		btn_UpDoc.grid(row=12,column=2,padx=10,pady=20,sticky='e')
+		
 	def Recuperar_OficinaGeneradora(self,usuario):
 		row=self.obj_consultas.query_OficinaMUser(usuario)
 		return row[0].Id_Oficina+':'+row[0].Oficina
@@ -103,7 +131,24 @@ class Documentos():
 			oficinas=[valor.Oficina for valor in rows]
 		self.Lista_Oficinas.config(values=oficinas)
 		self.Lista_Oficinas.current(0)
+	def llenar_tableDocumentos(self):
+		self.delete_table(self.table_Documentos)
+		rows=self.obj_consultas.documentos_EmitidosUpdate(2,0,self.oficinaG)
+		for valor in rows:
+			self.table_Documentos.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Nro_Pedido,valor.Descripcion,valor.Oficina))
+	def eliminar_Documento(self):
+		if self.table_Documentos.selection():
+			codigo_Accion=self.table_Documentos.item(self.table_Documentos.selection()[0])['values'][0]
+			codigo_pedido=self.table_Documentos.item(self.table_Documentos.selection()[0])['values'][1]
+			try:
+				self.obj_consultas.delete_itemINT('ACCION','Id_Accion',codigo_Accion)
+				self.obj_consultas.delete_itemSTR('PEDIDO','cod_Pedido',codigo_pedido)
+				self.llenar_tableDocumentos()
+			except Exception as e:
+				messagebox.showerror('Notificación',e)			
 
+		else:
+			messagebox.showinfo('Alerta','Seleccione un Item')
 	def Insertar_Pedido(self):
 		
 		#generando la lista
@@ -148,56 +193,66 @@ class Documentos():
 		datos.append(anio)
 		
 		#reestriccion de pedido
-		datosAccion=[codigo_Pedido,fecha,codigo_Usuario,'ninguna',2,codigo_Oficina_Derivar,0,anio]
-		if tipo=='BIEN':
-			condicion=[tipo,nroPedido,anio]
-			columnasC=['Tipo','Nro_Pedido','anio']			
-			rows_nroPedido=self.obj_consultas.consulta_2Condiciones('PEDIDO',condicion,columnasC)			
-			if len(rows_nroPedido)==0:
-				self.obj_consultas.query_InsertarPedido(datos)
-				self.obj_consultas.Insert_Accion(datosAccion)
-				messagebox.showinfo('Notificación','se registró correctamiento!!')
-				self.Capa()					
+		datosAccion=[codigo_Pedido,fecha,codigo_Usuario,'ninguna',2,codigo_Oficina_Derivar,0,anio,oficina_Generadora]
+		if codigo_Oficina_Derivar!=oficina_Generadora:
+			if tipo=='BIEN':
+				condicion=[tipo,nroPedido,anio]
+				columnasC=['Tipo','Nro_Pedido','anio']			
+				rows_nroPedido=self.obj_consultas.consulta_2Condiciones('PEDIDO',condicion,columnasC)			
+				if len(rows_nroPedido)==0:
+					self.obj_consultas.query_InsertarPedido(datos)
+					self.obj_consultas.Insert_Accion(datosAccion)
+
+					messagebox.showinfo('Notificación','se registró correctamiento!!')
+					self.Capa()					
+				else:
+					messagebox.showerror('Notificación','el numero de pedido ya fué registrada')
+					self.Capa()			
+
+
+			elif tipo=='SERVICIO':
+				condicion=[tipo,nroPedido,anio]
+				columnasC=['Tipo','Nro_Pedido','anio']
+				rows_nroServicio=self.obj_consultas.consulta_2Condiciones('PEDIDO',condicion,columnasC)
+				if len(rows_nroServicio)==0:				
+					self.obj_consultas.query_InsertarPedido(datos)
+					self.obj_consultas.Insert_Accion(datosAccion)
+					messagebox.showinfo('Notificación','se registró correctamiento!!')
+					self.Capa()
+				else:
+					messagebox.showerror('Notificación','el numero de Servicio ya fué registrada')
+					self.Capa()
+
 			else:
-				messagebox.showerror('Notificación','el numero de pedido ya fué registrada')
-				self.Capa()			
-
-
-		elif tipo=='SERVICIO':
-			condicion=[tipo,nroPedido,anio]
-			columnasC=['Tipo','Nro_Pedido','anio']
-			rows_nroServicio=self.obj_consultas.consulta_2Condiciones('PEDIDO',condicion,columnasC)
-			if len(rows_nroServicio)==0:				
-				self.obj_consultas.query_InsertarPedido(datos)
-				self.obj_consultas.Insert_Accion(datosAccion)
-				messagebox.showinfo('Notificación','se registró correctamiento!!')
-				self.Capa()
-			else:
-				messagebox.showerror('Notificación','el numero de Servicio ya fué registrada')
-				self.Capa()
-
+				condicion=[tipo,nroPedido,anio,codigo_Oficina_Derivar]
+				columnasC=['Tipo','Nro_Pedido','anio','Oficina']
+				rows_nroDocumento=self.obj_consultas.consulta_3Condiciones('PEDIDO',condicion,columnasC)
+				if len(rows_nroDocumento)==0:
+					self.obj_consultas.query_InsertarPedido(datos)
+					self.obj_consultas.Insert_Accion(datosAccion)
+					messagebox.showinfo('Notificación','se registró correctamiento!!')
+					self.Capa()
+				else:
+					messagebox.showerror('Notificación','el numero de Documento ya fué registrada')
+					self.Capa()
+			self.llenar_tableDocumentos()
 		else:
-			condicion=[tipo,nroPedido,anio,codigo_Oficina_Derivar]
-			columnasC=['Tipo','Nro_Pedido','anio','Oficina']
-			rows_nroDocumento=self.obj_consultas.consulta_3Condiciones('PEDIDO',condicion,columnasC)
-			if len(rows_nroDocumento)==0:
-				self.obj_consultas.query_InsertarPedido(datos)
-				self.obj_consultas.Insert_Accion(datosAccion)
-				messagebox.showinfo('Notificación','se registró correctamiento!!')
-				self.Capa()
-			else:
-				messagebox.showerror('Notificación','el numero de Documento ya fué registrada')
-				self.Capa()
+			messagebox.showerror('Error','No se puede derivar a la misma oficina')
 
 	def Capa(self):
-		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.6),height=int(self.height*0.6))
+		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.6),height=int(self.height*0.7))
 		self.Frame_Capa.place(x=0,y=0)
 		self.Frame_Capa.grid_propagate(False)
+
+	def delete_table(self,table):
+		for item in table.get_children():
+			table.delete(item)
 
 
 
 class Bandeja():
-	def __init__(self,oficina,dniUser):
+	def __init__(self,oficina,dniUser,ventana):
+		self.ventana=ventana
 		self.fecha_Actual=datetime.now()
 		self.oficina=oficina
 		self.dniUser=dniUser
@@ -224,7 +279,7 @@ class Bandeja():
 		
 		self.table_Recepcionar.place(x=int(width*0.03),y=60,width=int(width*0.7),height=220)
 		self.llenar_TablaRecepcionar()
-		btn_AccionR=Button(self.Frame_Docs,text="Accion")
+		btn_AccionR=ttk.Button(self.Frame_Docs,text="Recepcionar",width=20,cursor='hand2')
 		btn_AccionR['command']=self.Recepcionar
 		btn_AccionR.place(x=int(width*0.3),y=300)
 
@@ -248,7 +303,7 @@ class Bandeja():
 		self.table_Derivar.place(x=int(width*0.03),y=int(height*0.55),width=int(width*0.7),height=220)
 		self.llenar_TablaDerivar()
 
-		btn_AccionD=Button(self.Frame_Docs,text="Accion")
+		btn_AccionD=ttk.Button(self.Frame_Docs,text="Atender",width=20,cursor='hand2')
 		btn_AccionD['command']=self.Top_Atencion
 		btn_AccionD.place(x=int(width*0.3),y=int(height*0.8))
 
@@ -288,66 +343,66 @@ class Bandeja():
 			
 			rows=self.obj_consulta.query_PedidoAccion(codigo_pedido,codigo_A)			
 
-			self.TopAccion=Toplevel()
-			self.TopAccion.geometry('500x400')
+			self.TopAccion=Toplevel(self.ventana)
+			self.TopAccion.geometry('500x450')
 			self.TopAccion.title('Realizar Atencion')
 			self.TopAccion.grab_set()
 			self.TopAccion.resizable(0,0)
 
 			etiqueta=Label(self.TopAccion,text='Nro: ',font=self.letra1)
-			etiqueta.grid(row=1,column=2,pady=8,padx=5,sticky='e')
+			etiqueta.grid(row=1,column=1,pady=8,padx=5,sticky='e')
 			self.Entry_nro=Entry(self.TopAccion,width=40)
 			self.Entry_nro.insert('end',rows[0].Id_Accion)
 			self.Entry_nro['state']='readonly'
-			self.Entry_nro.grid(row=1,column=3,ipady=3)
+			self.Entry_nro.grid(row=1,column=2,columnspan=2,ipady=3)
 
 			etiqueta=Label(self.TopAccion,text='Codigo: ',font=self.letra1)
-			etiqueta.grid(row=2,column=2,pady=8,padx=5,sticky='e')
+			etiqueta.grid(row=2,column=1,pady=8,padx=5,sticky='e')
 			self.Entry_RCodigo=Entry(self.TopAccion,width=40)
 			self.Entry_RCodigo.insert('end',rows[0].Cod_Pedido)
 			self.Entry_RCodigo['state']='readonly'
-			self.Entry_RCodigo.grid(row=2,column=3,ipady=3)
+			self.Entry_RCodigo.grid(row=2,column=2,columnspan=2,ipady=3)
 
 			etiqueta=Label(self.TopAccion,text='Nro Doc: ',font=self.letra1)
-			etiqueta.grid(row=3,column=2,pady=8,padx=5,sticky='e')
+			etiqueta.grid(row=3,column=1,pady=8,padx=5,sticky='e')
 			self.Entry_RNorDoc=Entry(self.TopAccion,width=40)
 			self.Entry_RNorDoc.insert('end',rows[0].Nro_Pedido)
 			self.Entry_RNorDoc['state']='readonly'
-			self.Entry_RNorDoc.grid(row=3,column=3,ipady=3)
+			self.Entry_RNorDoc.grid(row=3,column=2,columnspan=2,ipady=3)
 
 			etiqueta=Label(self.TopAccion,text='Documento: ',font=self.letra1)
-			etiqueta.grid(row=4,column=2,pady=8,padx=5,sticky='e')
+			etiqueta.grid(row=4,column=1,pady=8,padx=5,sticky='e')
 			self.Entry_RPedido=Entry(self.TopAccion,width=40)
 			self.Entry_RPedido.insert('end',rows[0].Descripcion)
 			self.Entry_RPedido['state']='readonly'
-			self.Entry_RPedido.grid(row=4,column=3,ipady=3)
+			self.Entry_RPedido.grid(row=4,column=2,columnspan=2,ipady=3)
 
 			etiqueta=Label(self.TopAccion,text='Actividad: ',font=self.letra1)
-			etiqueta.grid(row=5,column=2,pady=8,padx=5,sticky='e')
+			etiqueta.grid(row=5,column=1,pady=8,padx=5,sticky='e')
 			self.Lista_Actividad=ttk.Combobox(self.TopAccion,width=35)
 			EstadoRows=self.obj_consulta.query_tabla('ESTADO')
 			self.llenarLista(self.Lista_Actividad,EstadoRows)
 			self.Lista_Actividad.current(1)
 			self.Lista_Actividad.bind("<<ComboboxSelected>>",self.evento_listaA)
-			self.Lista_Actividad.grid(row=5,column=3,ipady=3)
+			self.Lista_Actividad.grid(row=5,column=2,columnspan=2,ipady=3)
 
 			etiqueta=Label(self.TopAccion,text='Motivo: ',font=self.letra1)
-			etiqueta.grid(row=6,column=2,pady=8,padx=5,sticky='e')
+			etiqueta.grid(row=6,column=1,pady=8,padx=5,sticky='e')
 			self.Entry_RDescripcionPedido=Text(self.TopAccion,width=37,height=6)
-			self.Entry_RDescripcionPedido.grid(row=6,column=3)			
+			self.Entry_RDescripcionPedido.grid(row=6,column=2,columnspan=2)			
 
 			etiqueta=Label(self.TopAccion,text='Remitir A: ',font=self.letra1)
-			etiqueta.grid(row=7,column=2,pady=8,padx=5,sticky='e')
+			etiqueta.grid(row=7,column=1,pady=8,padx=5,sticky='e')
 			self.Lista_ROficina=ttk.Combobox(self.TopAccion,width=35)
-			self.Lista_ROficina.grid(row=7,column=3,ipady=3)
+			self.Lista_ROficina.grid(row=7,column=2,ipady=3,columnspan=2)
 
-			btn_AccionR=Button(self.TopAccion,text="Aceptar")
+			btn_AccionR=Button(self.TopAccion,text="Aceptar",width=20,cursor='hand2')
 			btn_AccionR['command']=self.Derivar_Doc
-			btn_AccionR.grid(row=8,column=1,padx=10,pady=10,sticky='e')
+			btn_AccionR.grid(row=8,column=2,padx=10,pady=10,sticky='w')
 
-			btn_AccionCancelar=Button(self.TopAccion,text="Cancelar")
-			#btn_AccionR['command']=self.Top_Atencion
-			btn_AccionCancelar.grid(row=8,column=3,columnspan=2,padx=10,pady=10,sticky='e')
+			btn_AccionCancelar=ttk.Button(self.TopAccion,text="Cancelar",width=20,cursor='hand2')
+			btn_AccionCancelar['command']=self.TopAccion.destroy
+			btn_AccionCancelar.grid(row=8,column=3,columnspan=2,padx=10,pady=10)
 			
 		else:
 			messagebox.showerror('Alerta','Seleccione un item')
@@ -371,6 +426,7 @@ class Bandeja():
 			self.Lista_ROficina['values']=ListOficina
 	
 	def Derivar_Doc(self):
+		
 		valores=[]
 		self.Entry_RCodigo['state']='normal'
 		codigo_pedido=self.Entry_RCodigo.get()
@@ -390,24 +446,40 @@ class Bandeja():
 		if idEstado!=1:
 			valores.append(idEstado)
 			id_oficina='X'
-			if Estado=='ATENDIDO' or Estado=='RECIBIDO':
-				id_oficina=self.oficina
-			else:			
-				id_oficina=self.obj_consulta.query_Tabla1Condicion('OFICINA','Oficina',self.Lista_ROficina.get())[0].Id_Oficina
+			try:
+				if Estado=='ATENDIDO' or Estado=='RECIBIDO':
+					id_oficina=self.oficina
+				else:			
+					id_oficina=self.obj_consulta.query_Tabla1Condicion('OFICINA','Oficina',self.Lista_ROficina.get())[0].Id_Oficina
 			
-			valores.append(id_oficina)
-			valores.append(0)
-			anio=self.fecha_Actual.strftime("%Y")
-			valores.append(anio)
+				#consultamos...
 			
-			#insertando accion
-			self.obj_consulta.Insert_Accion(valores)
-			self.Entry_nro['state']='normal'
-			id_Accion=self.Entry_nro.get()
-			#hereeeeeee....!!
-			self.obj_consulta.Update_AccionOtros(id_Accion)
-			messagebox.showinfo('Notificación','Exitoso!!')
-			self.llenar_TablaDerivar()
+				row_OfOrigen=self.obj_consulta.query_RetornaCodigo('PEDIDO',codigo_pedido,'cod_Pedido','Oficina')
+				
+				
+				if row_OfOrigen[0].Oficina!=id_oficina:
+					valores.append(id_oficina)
+					valores.append(0)
+					anio=self.fecha_Actual.strftime("%Y")
+					valores.append(anio)
+					valores.append(self.oficina)
+				
+					#insertando accion
+					self.obj_consulta.Insert_Accion(valores)
+					self.Entry_nro['state']='normal'
+					id_Accion=self.Entry_nro.get()
+					#hereeeeeee....!!
+					self.obj_consulta.Update_AccionOtros(id_Accion)
+					messagebox.showinfo('Notificación','Exitoso!!')
+					self.llenar_TablaDerivar()				
+
+
+				else:
+					messagebox.showerror('Alerta','No se puede derivar')
+			except Exception as e:
+				 messagebox.showerror('Alerta',f'error: {e}')
+			
+			
 
 		else:
 			messagebox.showerror('Alerta','No se puede Recepcionar el documento en este Modulo!!')
@@ -424,7 +496,7 @@ class Seguimiento():
 		self.width=width
 		self.height=height
 		#647B7B
-		self.Frame_Docs=Frame(frame,bg='blue',width=int(width*0.6),height=int(height*0.6))
+		self.Frame_Docs=Frame(frame,bg='#647B7B',width=int(width*0.6),height=int(height*0.6))
 		self.Frame_Docs.place(x=int(self.width*0.5)-int((self.width*0.6)/2),y=int(self.height*0.05))
 		self.Frame_Docs.grid_propagate(False)
 
@@ -473,6 +545,9 @@ class Seguimiento():
 	def delete_table(self,table):
 		for item in table.get_children():
 			table.delete(item)
+
+
+
 
 
 		

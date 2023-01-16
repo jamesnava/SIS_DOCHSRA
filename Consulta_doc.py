@@ -70,7 +70,7 @@ class querys(object):
 		rows=self.cursor.fetchall()
 		return rows
 	def Insert_Accion(self,datos):
-		sql=f"""INSERT INTO ACCION VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}')"""
+		sql=f"""INSERT INTO ACCION VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}','{datos[8]}')"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
 	
@@ -114,6 +114,33 @@ class querys(object):
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
+
+	def documentos_EmitidosUpdate(self,Id_estado,Manejador,ASOC_OFICINA):
+		rows=[]
+		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Descripcion,O.Oficina FROM PEDIDO AS P INNER JOIN ACCION AS A 
+		ON P.cod_Pedido=A.Cod_Pedido INNER JOIN OFICINA AS O ON A.Id_Oficina=O.Id_Oficina AND A.Id_Estado={Id_estado} AND
+		 A.Manejador={Manejador} AND A.ASOC_OFICINA='{ASOC_OFICINA}'"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+	def delete_itemINT(self,table,columna,condicion):
+		sql=f"""DELETE FROM {table} WHERE {columna}={condicion}"""
+		self.cursor.execute(sql)
+		self.cursor.commit()
+
+	def delete_itemSTR(self,table,columna,condicion):
+		sql=f"""DELETE FROM {table} WHERE {columna}='{condicion}'"""
+		self.cursor.execute(sql)
+		self.cursor.commit()
+	def Update_Pass(self,Usuario,contraA,ContraN):
+		rows=[]
+		sql=f"""UPDATE USUARIO SET Contrasenia='{ContraN}' WHERE Usuario='{Usuario}' AND Contrasenia='{contraA}'"""
+		self.cursor.execute(sql)
+		self.cursor.commit()
+			
+		#rows=self.cursor.fetchall()
+		#return rows
+
 
 
 
