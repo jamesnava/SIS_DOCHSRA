@@ -5,18 +5,21 @@ from tkinter import messagebox
 import GUI_User
 import documentos
 import Consulta_doc
+import datetime
+import time
 
 
 class Ventana_Principal(object):
 	"""docstring for Ventana_Principal"""
 	def __init__(self,usuario):
+		self.hora=datetime.datetime.now()
 		self.usuario=usuario
 		self.letra_leyenda=('Candara',16,'bold italic')		
 	
 		self.ventana=Tk()
 		self.ventana.title('Seguimiento Documentario')
 		 
-		self.ventana.iconbitmap('image/doctor.ico')		
+		self.ventana.iconbitmap('image/libro.ico')		
 		self.height=int(self.ventana.winfo_screenheight()*0.9)
 		self.width=int(self.ventana.winfo_screenwidth()*0.9)		
 		self.ventana.geometry("%dx%d" % (self.width,self.height)+"+0+0")
@@ -38,9 +41,9 @@ class Ventana_Principal(object):
 		# creando menu Acciones
 		self.M_Acciones=Menu(self.Barra_Menu,tearoff=False)
 		self.M_Acciones.add_command(label='Generar Documento',command=self.M_GenerarDocumento)
-		self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)
-		
+		self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)		
 		self.M_Acciones.add_command(label='Seguimiento',command=self.Seguimiento_Documentario)
+		#self.M_Acciones.add_command(label='Imprimir Hoja de Tramite')
 		self.M_Acciones.add_separator()		
 		self.Barra_Menu.add_cascade(label='Documentos',menu=self.M_Acciones)
 				
@@ -50,8 +53,6 @@ class Ventana_Principal(object):
 		self.M_Ayuda.add_command(label='Desarrollado por...', command=self.autor)		
 		self.M_Ayuda.add_separator()		
 		self.Barra_Menu.add_cascade(label='Ayuda',menu=self.M_Ayuda)
-
-
 		self.agregar_bottom()
 
 	def Return_Office(self):
@@ -62,10 +63,10 @@ class Ventana_Principal(object):
 	def agregar_bottom(self):		
 		self.Frame_Bottom=Frame(self.ventana,bg='#647B7B',width=self.width,height=int(self.height*0.03))
 		self.Frame_Bottom.pack(side='bottom')
-		etiqueta_usuario=Label(self.Frame_Bottom,text='Usuario: ')
+		etiqueta_usuario=Label(self.Frame_Bottom,text='Usuario: ',font=('Candara',11,'bold italic')	)
 		etiqueta_usuario.grid(row=0,column=0)
-		etiqueta_UsuarioValor=Label(self.Frame_Bottom,text=self.usuario)
-		etiqueta_UsuarioValor.grid(row=0,column=1)
+		etiqueta_UsuarioValor=Label(self.Frame_Bottom,text=self.usuario,font=('Candara',11,'bold italic'))
+		etiqueta_UsuarioValor.grid(row=0,column=1)		
 
 	def M_GenerarDocumento(self):
 		oficina,usuario=self.Return_Office()
@@ -93,7 +94,9 @@ class Ventana_Principal(object):
 		obj_Documentos.Seguimiento(self.Frame_Bandeja,self.width,self.height)
 
 	def Cambiar_Contrasenia(self):
+
 		Top_Contrasenia=Toplevel(self.ventana)
+		Top_Contrasenia.iconbitmap('image/pass.ico')	
 		Top_Contrasenia.geometry('400x200')
 		Top_Contrasenia.resizable(0,0)
 		Top_Contrasenia.grab_set()

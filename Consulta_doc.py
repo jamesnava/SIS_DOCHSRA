@@ -20,6 +20,13 @@ class querys(object):
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
+	#max pedido
+	def query_Max(self):
+		rows=[]
+		sql=f"""SELECT MAX(Nro_Tramite) AS nro FROM PEDIDO WHERE anio=(SELECT YEAR(GETDATE()))"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
 	#para recepcion
 	def Update_TableEstadoAccion(self,codigo,estado):
 		sql=f"""UPDATE ACCION SET Id_Estado={estado} WHERE Id_Accion='{codigo}'"""
@@ -44,6 +51,7 @@ class querys(object):
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
+
 	def query_tablas(self,tabla):
 		rows=[]
 		sql=f"""SELECT * FROM {tabla}"""
@@ -52,7 +60,7 @@ class querys(object):
 		return rows
 
 	def query_InsertarPedido(self,datos):
-		sql=f"""INSERT INTO PEDIDO VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}')"""
+		sql=f"""INSERT INTO PEDIDO VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}','{datos[8]}','{datos[9]}','{datos[10]}','{datos[11]}')"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
 

@@ -5,6 +5,7 @@ import usuario
 import V_Main
 import time
 
+
 class Login():
 	def __init__(self):
 		self.obj_usuario=usuario.usuario()

@@ -4,6 +4,9 @@ from tkinter import messagebox
 import generales
 import Consulta_doc
 from datetime import datetime
+from PIL import Image
+import pdf
+import os
 class Documentos():
 	def __init__(self,oficina,usuario):
 		self.oficinaG=oficina
@@ -25,15 +28,26 @@ class Documentos():
 		self.Entry_Codigo['state']='readonly'
 		self.Entry_Codigo.grid(row=0,column=2,ipady=3)
 
-		etiqueta=Label(self.Frame_Docs,text='Nro Doc: ',bg='#647B7B',font=letra)
+		etiqueta=Label(self.Frame_Docs,text='Numeracion: ',bg='#647B7B',font=letra)
 		etiqueta.grid(row=0,column=3,pady=8,padx=5,sticky='e')
 		self.Entry_NroPedido=Entry(self.Frame_Docs,width=40)
-		self.Entry_NroPedido.bind("<KeyRelease>",lambda event,campo=self.Entry_NroPedido:generales.validar_numero(event,campo))
+		#self.Entry_NroPedido.bind("<KeyRelease>",lambda event,campo=self.Entry_NroPedido:generales.validar_numero(event,campo))
 		self.Entry_NroPedido.grid(row=0,column=4,ipady=3)
+
+		etiqueta=Label(self.Frame_Docs,text='Razon Social: ',font=letra,bg='#647B7B')
+		etiqueta.grid(row=1,column=1,pady=8,padx=5,sticky='e')
+		self.Entry_Razon=Entry(self.Frame_Docs,width=40)		
+		self.Entry_Razon.grid(row=1,column=2,ipady=3)
+
+		etiqueta=Label(self.Frame_Docs,text='Asunto: ',bg='#647B7B',font=letra)
+		etiqueta.grid(row=1,column=3,pady=8,padx=5,sticky='e')
+		self.Entry_Asunto=Entry(self.Frame_Docs,width=40)
+		self.Entry_Asunto.grid(row=1,column=4,ipady=3)
+
 
 		etiqueta=Label(self.Frame_Docs,text='Descripcion: ',font=letra,bg='#647B7B')
 		etiqueta.grid(row=2,column=1,pady=8,padx=5,sticky='e')
-		self.Text_Descripcion=Text(self.Frame_Docs,width=50,height=6)
+		self.Text_Descripcion=Text(self.Frame_Docs,width=60,height=6)
 		self.Text_Descripcion.grid(row=2,column=2,columnspan=4,sticky='w')
 
 		etiqueta=Label(self.Frame_Docs,text='Tipo: ',bg='#647B7B',font=letra)
@@ -161,6 +175,7 @@ class Documentos():
 		nroPedido=self.Entry_NroPedido.get()		
 		datos.append(nroPedido)
 
+
 		descripcion=self.Text_Descripcion.get('1.0','end-1c')
 		datos.append(descripcion)
 
@@ -191,6 +206,27 @@ class Documentos():
 		self.Entry_Anio['state']='normal'
 		anio=self.Entry_Anio.get()
 		datos.append(anio)
+
+		#falta numero de tramite
+		num=0
+		nroRow=self.obj_consultas.query_Max()		
+		if nroRow[0].nro!=None:
+			num=nroRow[0].nro+1
+		else:
+			num=1
+
+		datos.append(num)
+		#asunto
+		razon=self.Entry_Razon.get()
+		datos.append(razon)
+
+		#Asunto
+		asunto=self.Entry_Asunto.get()
+		datos.append(asunto)
+
+		#hora
+		Hora=self.fecha_Actual.strftime("%H:%m")
+		datos.append(Hora)
 		
 		#reestriccion de pedido
 		datosAccion=[codigo_Pedido,fecha,codigo_Usuario,'ninguna',2,codigo_Oficina_Derivar,0,anio,oficina_Generadora]
@@ -247,7 +283,6 @@ class Documentos():
 	def delete_table(self,table):
 		for item in table.get_children():
 			table.delete(item)
-
 
 
 class Bandeja():
@@ -307,6 +342,12 @@ class Bandeja():
 		btn_AccionD['command']=self.Top_Atencion
 		btn_AccionD.place(x=int(width*0.3),y=int(height*0.8))
 
+		image=PhotoImage(file='image/impre.png')
+		self.etiqueta_print=Label(self.Frame_Docs,image=image,bg='#647B7B',cursor='hand2')
+		self.etiqueta_print.image=image
+		self.etiqueta_print.bind("<Button-1>",self.print_expediente)
+		self.etiqueta_print.place(x=int(width*0.94),y=int(height*0.54))
+
 	def llenar_TablaRecepcionar(self):
 		rows=self.obj_consulta.query_DocXEstado(self.oficina,2)		
 		for valor in rows:			
@@ -344,6 +385,7 @@ class Bandeja():
 			rows=self.obj_consulta.query_PedidoAccion(codigo_pedido,codigo_A)			
 
 			self.TopAccion=Toplevel(self.ventana)
+			self.TopAccion.iconbitmap('image/paciente.ico')
 			self.TopAccion.geometry('500x450')
 			self.TopAccion.title('Realizar Atencion')
 			self.TopAccion.grab_set()
@@ -484,6 +526,17 @@ class Bandeja():
 		else:
 			messagebox.showerror('Alerta','No se puede Recepcionar el documento en este Modulo!!')
 		self.TopAccion.destroy()
+
+	def print_expediente(self,event):
+		if self.table_Derivar.selection():			
+			codigo=self.table_Derivar.item(self.table_Derivar.selection()[0])['values'][1]
+			rows=self.obj_consulta.query_RetornaCodigo('PEDIDO',codigo,'cod_Pedido','Nro_Tramite')
+			obj_pdf=pdf.PDF(rows[0].Nro_Tramite)
+			if messagebox.askquestion('Atencion','Desea Imprimir el expediente'):
+				os.startfile('Expediente.pdf','print')
+		else:
+			messagebox.showinfo('Atencion','Seleccione un ITEM!!')
+			
 
 class Seguimiento():
 
