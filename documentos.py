@@ -17,7 +17,8 @@ class Documentos():
 		letra=('Comic Sans MS',12,'bold')
 		self.width=width
 		self.height=height
-		self.Frame_Docs=Frame(frame,bg='#647B7B',width=int(width*0.6),height=int(height*0.7))
+		#647B7B
+		self.Frame_Docs=Frame(frame,bg='#647B7B',width=int(width*0.6),height=int(height*0.71))
 		self.Frame_Docs.place(x=int(self.width*0.5)-int((self.width*0.6)/2),y=int(self.height*0.08))
 		self.Frame_Docs.grid_propagate(False)
 
@@ -104,26 +105,33 @@ class Documentos():
 		s.configure("model.Treeview",background="#1099B5")
 
 		etiqueta=Label(self.Frame_Docs,text="LISTA DE DOCUMENTOS",bg='#647B7B',fg="#1B3A71",font=('Comic Sans MS',18,'bold'))
-		etiqueta.grid(row=8,column=1,pady=10,columnspan=4)
+		etiqueta.grid(row=8,column=1,pady=5,columnspan=4)
 
 		self.table_Documentos=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5'),show='headings',style="model.Treeview")
-
 		self.table_Documentos.heading("#1",text="Nro")
-		self.table_Documentos.column("#1",width=10,anchor="w")
+		self.table_Documentos.column("#1",width=20,anchor="w")
 		self.table_Documentos.heading("#2",text="CODIGO")
 		self.table_Documentos.column("#2",width=80,anchor="w")
 		self.table_Documentos.heading("#3",text="NRO DOC")
-		self.table_Documentos.column("#3",width=80,anchor="w")
+		self.table_Documentos.column("#3",width=200,anchor="w")
 		self.table_Documentos.heading("#4",text="Descripcion")
-		self.table_Documentos.column("#4",width=400,anchor="w")
+		self.table_Documentos.column("#4",width=350,anchor="w")
 		self.table_Documentos.heading("#5",text="Derivado a")
 		self.table_Documentos.column("#5",width=200,anchor="w")	
-		self.table_Documentos.grid(row=9,column=1,columnspan=4,rowspan=2,pady=10)
+		self.table_Documentos.grid(row=9,column=1,columnspan=4,rowspan=2,pady=5)
 		self.llenar_tableDocumentos()
+
+		
 
 		btn_UpDoc=ttk.Button(self.Frame_Docs,text='Eliminar',width=20,cursor="hand2")
 		btn_UpDoc['command']=self.eliminar_Documento
-		btn_UpDoc.grid(row=12,column=2,padx=10,pady=20,sticky='e')
+		btn_UpDoc.grid(row=11,column=2,padx=10,pady=5,sticky='e')
+
+		image=PhotoImage(file='image/impre.png')
+		#image= image.resize(40,40)
+		self.etiqueta_print=ttk.Button(self.Frame_Docs,text='Imprimir Exp.',width=20,cursor='hand2')		
+		self.etiqueta_print.bind("<Button-1>",self.print_expediente)
+		self.etiqueta_print.grid(row=11,column=3)
 		
 	def Recuperar_OficinaGeneradora(self,usuario):
 		row=self.obj_consultas.query_OficinaMUser(usuario)
@@ -182,7 +190,7 @@ class Documentos():
 		tipo=self.listTipo.get()
 		datos.append(tipo)
 
-		fecha=self.fecha_Actual.strftime("%d-%m-%Y")
+		fecha=self.fecha_Actual.strftime("%d-%m-%Y %H:%M")
 		datos.append(fecha)
 
 		#oficina
@@ -225,7 +233,7 @@ class Documentos():
 		datos.append(asunto)
 
 		#hora
-		Hora=self.fecha_Actual.strftime("%H:%m")
+		Hora=self.fecha_Actual.strftime("%H:%M")
 		datos.append(Hora)
 		
 		#reestriccion de pedido
@@ -276,13 +284,24 @@ class Documentos():
 			messagebox.showerror('Error','No se puede derivar a la misma oficina')
 
 	def Capa(self):
-		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.6),height=int(self.height*0.7))
+		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.6),height=int(self.height*0.71))
 		self.Frame_Capa.place(x=0,y=0)
 		self.Frame_Capa.grid_propagate(False)
 
 	def delete_table(self,table):
 		for item in table.get_children():
 			table.delete(item)
+
+	def print_expediente(self,event):
+		if self.table_Documentos.selection():			
+			codigo=self.table_Documentos.item(self.table_Documentos.selection()[0])['values'][1]
+			rows=self.obj_consultas.query_RetornaCodigo('PEDIDO',codigo,'cod_Pedido','Nro_Tramite')
+			obj_pdf=pdf.PDF(rows[0].Nro_Tramite)
+			if messagebox.askquestion('Atencion','Desea Imprimir el expediente'):
+				os.startfile('Expediente.pdf','print')
+				
+		else:
+			messagebox.showinfo('Atencion','Seleccione un ITEM!!')
 
 
 class Bandeja():
@@ -474,7 +493,7 @@ class Bandeja():
 		codigo_pedido=self.Entry_RCodigo.get()
 		valores.append(codigo_pedido)		
 
-		fecha=self.fecha_Actual.strftime("%d-%m-%Y")
+		fecha=self.fecha_Actual.strftime("%d-%m-%Y %H:%M")
 		valores.append(fecha)
 		valores.append(self.dniUser)
 
@@ -544,6 +563,7 @@ class Seguimiento():
 		self.oficina=oficina
 		self.usuario=usuario
 		self.obj_consulta=Consulta_doc.querys()
+		self.fecha_Actual=datetime.now()
 	def Seguimiento(self,frame,width,height):
 		letra=('Comic Sans MS',12,'bold')
 		self.width=width
@@ -553,47 +573,48 @@ class Seguimiento():
 		self.Frame_Docs.place(x=int(self.width*0.5)-int((self.width*0.6)/2),y=int(self.height*0.05))
 		self.Frame_Docs.grid_propagate(False)
 
-		etiqueta=Label(self.Frame_Docs,text='Nro Documento: ',font=letra,bg='#647B7B')
+		etiqueta=Label(self.Frame_Docs,text='Nro Expediente: ',font=letra,bg='#647B7B')
 		etiqueta.grid(row=0,column=1,pady=8,padx=5,sticky='e')
 		self.Entry_NroDoc=Entry(self.Frame_Docs,width=40)		
 		self.Entry_NroDoc.grid(row=0,column=2,ipady=3)
 
 		etiqueta=Label(self.Frame_Docs,text='Tipo: ',bg='#647B7B',font=letra)
 		etiqueta.grid(row=0,column=3,pady=8,padx=5,sticky='e')
-		self.List_Tipo=ttk.Combobox(self.Frame_Docs,width=40)
-		self.List_Tipo['values']=['SERVICIO','BIEN','DOCUMENTO']		
-		self.List_Tipo.grid(row=0,column=4,ipady=3)					
+		self.Entry_anio=Entry(self.Frame_Docs,width=40)
+		self.Entry_anio.insert('end',self.fecha_Actual.strftime("%Y"))
+		self.Entry_anio['state']='readonly'			
+		self.Entry_anio.grid(row=0,column=4,ipady=3)					
 
 		btn_Aceptar=Button(self.Frame_Docs,text='Buscar',width=20)
 		btn_Aceptar['command']=self.event_Seguimiento	
 		btn_Aceptar.grid(row=7,column=2,columnspan=2,padx=10,pady=10,sticky='e')
 
 
-		self.table_Seguimiento=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6'),show='headings')	
+		self.table_Seguimiento=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5'),show='headings')	
 		self.table_Seguimiento.heading("#1",text="Nro Doc")
-		self.table_Seguimiento.column("#1",width=10,anchor="w")
+		self.table_Seguimiento.column("#1",width=100,anchor="w")
 		self.table_Seguimiento.heading("#2",text="Descripcion")
-		self.table_Seguimiento.column("#2",width=200,anchor="w")
-		self.table_Seguimiento.heading("#3",text="Tipo de Doc")
-		self.table_Seguimiento.column("#3",width=100,anchor="w")
-		self.table_Seguimiento.heading("#4",text="Oficina")
-		self.table_Seguimiento.column("#4",width=200,anchor="w")
-		self.table_Seguimiento.heading("#5",text="Estado")
-		self.table_Seguimiento.column("#5",width=80,anchor="w")
-		self.table_Seguimiento.heading("#6",text="Fecha Movimiento")
-		self.table_Seguimiento.column("#6",width=60,anchor="w")				
+		self.table_Seguimiento.column("#2",width=200,anchor="w")		
+		self.table_Seguimiento.heading("#3",text="Oficina")
+		self.table_Seguimiento.column("#3",width=200,anchor="w")
+		self.table_Seguimiento.heading("#4",text="Estado")
+		self.table_Seguimiento.column("#4",width=80,anchor="w")
+		self.table_Seguimiento.heading("#5",text="Fecha Movimiento")
+		self.table_Seguimiento.column("#5",width=60,anchor="w")				
 		self.table_Seguimiento.place(x=int(width*0.03),y=int(self.height*0.1),width=int(width*0.55),height=220)
 
 	def event_Seguimiento(self):
 		self.delete_table(self.table_Seguimiento)
 		Nro_Documento=self.Entry_NroDoc.get()
-		Tipo=self.List_Tipo.get()
-		rows=self.obj_consulta.query_Seguimiento(Nro_Documento,Tipo,self.oficina)
+		self.Entry_anio['state']='normal'
+		anio=self.Entry_anio.get()
+
+		rows=self.obj_consulta.query_Seguimiento(Nro_Documento,anio)
 
 		for valor in rows:
 			estado=self.obj_consulta.query_RetornaCodigo('ESTADO',valor.Id_Estado,'Id_Estado','Estado')
 			ofi=self.obj_consulta.query_RetornaCodigo('OFICINA',valor.Id_Oficina,'Id_Oficina','Oficina')
-			self.table_Seguimiento.insert('','end',values=(valor.Nro_Pedido,valor.Descripcion,Tipo,ofi[0].Oficina,estado[0].Estado,valor.Presentado))
+			self.table_Seguimiento.insert('','end',values=(valor.Nro_Pedido,valor.Asunto,ofi[0].Oficina,estado[0].Estado,valor.Presentado))
 
 	def delete_table(self,table):
 		for item in table.get_children():

@@ -2,9 +2,11 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from datetime import datetime
 
 class PDF():
 	def __init__(self,nro_expediente):
+		self.fecha_Actual=datetime.now()
 		pdfmetrics.registerFont(TTFont('Banana','Heavitas.ttf'))
 		self.NroExpediente=nro_expediente
 		self.width,self.height=A4
@@ -23,7 +25,7 @@ class PDF():
 		self.Hoja.drawString(int(self.width*0.73),self.height-130,"Nro Reg:")
 		#self.Hoja.drawString(int(self.width*0.8),self.height-130,"..."*12)
 		self.Hoja.setFont('Banana',10)
-		self.Hoja.drawString(int(self.width*0.81),self.height-130,f"{nro_expediente}")
+		self.Hoja.drawString(int(self.width*0.81),self.height-130,f"{self.fecha_Actual.strftime('%Y')}-{nro_expediente}")
 		self.Hoja.setFont('Banana',8)
 		self.Hoja.drawString(10,self.height-150,"Asunto:")
 		self.Hoja.drawString(100,self.height-150,"......"*40)
@@ -36,11 +38,11 @@ class PDF():
 		self.Hoja.showPage()
 		self.Hoja.save()
 	def cabecera(self,Hoja):
-		cabecera=['ENTREGAR A','PARA','FECHA','ACCION','FIRMA']
+		cabecera=['ENTREGAR A','PARA','FECHA','FIRMA']
 		for i,valor in enumerate(cabecera):
 			self.Hoja.drawString(self.x[i]+5,self.height-int(self.height*0.27),valor)
 	def set_grilla(self,separacion,Hoja,posicionActual):
-		self.x=[10,170,320,380,450,550]
+		self.x=[10,170,320,450,550]
 		y=[]
 		suma=0
 		for i in range(0,14):

@@ -113,12 +113,11 @@ class querys(object):
 		rows=self.cursor.fetchall()
 		return rows
 
-	def query_Seguimiento(self,nroPedido,Tipo,Oficina):
+	def query_Seguimiento(self,nroPedido,anio):
 		
 		rows=[]
-		sql=f"""SELECT P.Nro_Pedido,P.Descripcion,A.Fecha,A.Id_Estado,A.Id_Oficina,P.Fecha AS Presentado 
-		FROM PEDIDO AS P INNER JOIN ACCION as A ON P.cod_Pedido=A.Cod_Pedido AND P.Nro_Pedido={nroPedido} AND P.Tipo='{Tipo}' 
-		AND P.Oficina='{Oficina}'"""
+		sql=f"""SELECT P.Nro_Pedido,P.Asunto,A.Fecha,A.Id_Estado,A.Id_Oficina,A.Fecha AS Presentado 
+		FROM PEDIDO AS P INNER JOIN ACCION as A ON P.cod_Pedido=A.Cod_Pedido AND P.Nro_Tramite={nroPedido} AND P.anio='{anio}'"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
