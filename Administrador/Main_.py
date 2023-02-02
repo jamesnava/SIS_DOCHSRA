@@ -51,7 +51,9 @@ class Login():
 
 		except Exception as e:
 			raise e	
+			
 	def Frame_Session(self):
+
 		font_label=('Candara',16,'bold italic')
 		self.Frame_Session=Frame(self.Frame_Main,bg='#6D9CA6',highlightbackground="black", highlightthickness=2)
 		self.Frame_Session.place(x=5,y=5)		
@@ -80,21 +82,40 @@ class Login():
 		self.btn_cerrar=ttk.Button(self.Frame_Session,text='Cerrar',width=20,state='normal',cursor='hand2')
 		self.btn_cerrar.grid(row=5,column=2,pady=50)
 		self.btn_cerrar['command']=self.root.quit
+
 	def Frame_Acceso(self):
+
 		self.mainFrame=Frame(self.Frame_Main)
 		self.mainFrame.config(bg='#252F61')	
 		self.mainFrame.place(x=5,y=5)
-		self.mainFrame.config(width=490,height=540)
+		self.mainFrame.config(width=490,height=540)			
 
-		my_image = ImageTk.PhotoImage(Image.open("oficina.jpg"))
-		my_image = PhotoImage(self.mainFrame, image=my_image)
-		my_image.grid(x=0,y=0)		
-
-		Frame_Menues=Frame(self.Frame_Main,bg='#D1E0E3',highlightbackground="white", highlightthickness=2)
+		Frame_Menues=Frame(self.Frame_Main,bg='white',highlightbackground="white", highlightthickness=2)
 		Frame_Menues.config(width=464,height=300)
 		Frame_Menues.place(x=17,y=220)
+		etiqueta1=Label(Frame_Menues,text='valor1')
+		etiqueta1.place(x=10,y=50)
+		self.insert_ico(etiqueta1,"user.png")
+
+		etiqueta2=Label(Frame_Menues,text='valor2')
+		etiqueta2.place(x=100,y=50)
+		self.insert_ico(etiqueta2,"office.png")
+
+		etiqueta3=Label(Frame_Menues,text='valor2')
+		etiqueta3.place(x=200,y=50)
+		etiqueta3.bind("<Double-Button-1>",self.close_window)
+		self.insert_ico(etiqueta3,"salir.png")
+		
 	def llenar_Menues(self):
 		pass
+	def close_window(self,event):
+		self.root.destroy()
+
+	def insert_ico(self,label,url):
+		image=PhotoImage(file=url)
+		label.config(image=image)
+		label.image=image
+
 
 Login()
 

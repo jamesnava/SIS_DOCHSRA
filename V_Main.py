@@ -5,6 +5,7 @@ from tkinter import messagebox
 import GUI_User
 import documentos
 import Consulta_doc
+import documentoHistorial
 import datetime
 import time
 
@@ -20,12 +21,12 @@ class Ventana_Principal(object):
 		self.ventana.title('Seguimiento Documentario')
 		 
 		self.ventana.iconbitmap('image/libro.ico')		
-		self.height=int(self.ventana.winfo_screenheight()*0.9)
+		self.height=int(self.ventana.winfo_screenheight()*0.92)
 		self.width=int(self.ventana.winfo_screenwidth()*0.9)		
 		self.ventana.geometry("%dx%d" % (self.width,self.height)+"+0+0")
 		self.ventana.resizable(0,0)
 		#frame principal
-		self.Frame_Principal=Frame(self.ventana,bg='#647B7B',width=self.width,height=int(self.height*0.96))
+		self.Frame_Principal=Frame(self.ventana,bg='#647B7B',width=self.width,height=int(self.height*0.95))
 		self.Frame_Principal.pack()
 		#agregando menu
 		self.Barra_Menu=Menu(self.ventana)
@@ -41,8 +42,9 @@ class Ventana_Principal(object):
 		# creando menu Acciones
 		self.M_Acciones=Menu(self.Barra_Menu,tearoff=False)
 		self.M_Acciones.add_command(label='Generar Documento',command=self.M_GenerarDocumento)
-		self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)		
+		self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)				
 		self.M_Acciones.add_command(label='Seguimiento',command=self.Seguimiento_Documentario)
+		self.M_Acciones.add_command(label='Historial de Documentos',command=self.Historial_Documentario)
 		#self.M_Acciones.add_command(label='Imprimir Hoja de Tramite')
 		self.M_Acciones.add_separator()		
 		self.Barra_Menu.add_cascade(label='Documentos',menu=self.M_Acciones)
@@ -61,7 +63,7 @@ class Ventana_Principal(object):
 		return rows[0].Id_Oficina,rows[0].dni
 
 	def agregar_bottom(self):		
-		self.Frame_Bottom=Frame(self.ventana,bg='#647B7B',width=self.width,height=int(self.height*0.03))
+		self.Frame_Bottom=Frame(self.ventana,bg='#647B7B',width=self.width,height=int(self.height*0.05))
 		self.Frame_Bottom.pack(side='bottom')
 		etiqueta_usuario=Label(self.Frame_Bottom,text='Usuario: ',font=('Candara',11,'bold italic')	)
 		etiqueta_usuario.grid(row=0,column=0)
@@ -92,6 +94,14 @@ class Ventana_Principal(object):
 		self.Frame_Bandeja.grid_propagate(False)
 		obj_Documentos=documentos.Seguimiento(oficina,usuario)
 		obj_Documentos.Seguimiento(self.Frame_Bandeja,self.width,self.height)
+
+	def Historial_Documentario(self):
+		oficina,usuario=self.Return_Office()
+		self.Frame_Historial=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=0)
+		self.Frame_Historial.place(x=10,y=10)
+		self.Frame_Historial.grid_propagate(False)
+		obj_HistorialDoc=documentoHistorial.DocumentoAccion(oficina,usuario)
+		obj_HistorialDoc.Top_Menu(self.Frame_Historial,self.width,self.height)
 
 	def Cambiar_Contrasenia(self):
 
@@ -133,7 +143,7 @@ class Ventana_Principal(object):
 			messagebox.showerror('Error',e)
 
 	def acercade(self):
-		messagebox.showinfo('informacion del software',"""Sistema de seguimiento documentario, version 1.0""")
+		messagebox.showinfo('informacion del software',"""Sistema de seguimiento documentario, version 1.1""")
 	def autor(sel):
 		messagebox.showinfo('Desarrollado por',"""El sistema de seguimiento documentario fue desarrollado por la\nUNIDAD DE ESTADISTICA E INFORMATICA a través de la oficina de\nDESARROLLO DE SOFTWARE del Hospital Sub Regional de Andahuaylas\nTodos los derechos reservado ®2023\nby JAIME NAVARRO CRUZ- navarrocruzjaime@gmail.com""")
 

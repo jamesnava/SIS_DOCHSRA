@@ -144,6 +144,15 @@ class querys(object):
 		sql=f"""UPDATE USUARIO SET Contrasenia='{ContraN}' WHERE Usuario='{Usuario}' AND Contrasenia='{contraA}'"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
+
+	def update_Pedido(self,codigo,nroPedido,asunto,razon,descripcion):
+		sql=f"""UPDATE PEDIDO SET Nro_Pedido='{nroPedido}',Asunto='{asunto}',Razon='{razon}',Descripcion='{descripcion}' WHERE cod_Pedido='{codigo}'"""
+		self.cursor.execute(sql)
+		self.cursor.commit()
+	def Update_Accion(self,id_accion,Id_oficina):
+		sql=f"""UPDATE ACCION SET Id_Oficina='{Id_oficina}' WHERE Id_Accion='{id_accion}'"""
+		self.cursor.execute(sql)
+		self.cursor.commit()
 			
 		#rows=self.cursor.fetchall()
 		#return rows
