@@ -1,30 +1,48 @@
+
 #creando tabla oficina
-CREATE TABLE OFICINA(Id_Oficina VARCHAR(5),
+CREATE TABLE OFICINA(
+Id_Oficina VARCHAR(5),
 Oficina VARCHAR(200),
 Ofi_Descripcion VARCHAR(300),
 PRIMARY KEY(Id_Oficina))
 
+CREATE TABLE ROL(
+Id_Rol INT IDENTITY(1,1),
+Rol VARCHAR(50),
+Descripcion VARCHAR(100),
+PRIMARY KEY(Id_Rol)
+)
+
 #creando tabla usuario
-CREATE TABLE USUARIO(dni VARCHAR(10),
-Nombre VARCHAR(50),
+CREATE TABLE USUARIO(
+dni VARCHAR(10),
+Nombre VARCHAR(100),
 Apellidos VARCHAR(100),
 Usuario VARCHAR(15),
 Contrasenia VARCHAR(300),
 PRIMARY KEY(dni),
 Id_Oficina VARCHAR(5),
+Id_Rol INT,
+FOREIGN KEY(Id_Rol) REFERENCES ROL(Id_Rol),
 FOREIGN KEY (Id_Oficina) REFERENCES OFICINA(Id_Oficina) 
 )
 
 #creando la tabla pedidos
-
-CREATE TABLE PEDIDO(cod_Pedido VARCHAR(5),
-Nro_Pedido VARCHAR(6),
-Descripcion VARCHAR(50),
-Tipo VARCHAR(10),
+CREATE TABLE PEDIDO(
+cod_Pedido VARCHAR(5),
+Nro_Pedido VARCHAR(50),
+Descripcion VARCHAR(100),
+Tipo VARCHAR(20),
 Fecha DATE,
 Oficina VARCHAR(5),
 dni VARCHAR(10),
+anio VARCHAR(6),
+Id_Expediente INT,
+Razon VARCHAR(100),
+Asunto VARCHAR(70),
+Hora VARCHAR(10),
 PRIMARY KEY (cod_Pedido),
+FOREIGN KEY (Id_Expediente) REFERENCES EXPEDIENTE(Id_Expediente),
 FOREIGN KEY (dni) REFERENCES USUARIO(dni)
 )
 
@@ -36,15 +54,35 @@ PRIMARY KEY (Id_Estado)
 )
 
 # creando la tabla accion
-CREATE TABLE ACCION(Id_Accion INT IDENTITY (1,1),
-Nro_Pedido VARCHAR(6),
+CREATE TABLE ACCION(
+Id_Accion INT IDENTITY (1,1),
+Cod_Pedido VARCHAR(5),
 Fecha DATETIME,
 Usuario VARCHAR(10),
 Observacion VARCHAR(100),
 Id_Estado INT,
 Id_Oficina VARCHAR(5),
-PRIMARY (KEY Id_Accion),
+Manejador INT,
+anio VARCHAR(5),
+ASOC_OFICINA VARCHAR(10),
+PRIMARY KEY (Id_Accion),
 FOREIGN KEY (Id_Estado) REFERENCES ESTADO(Id_Estado),
-FOREIGN KEY(Nro_Pedido) REFERENCES PEDIDO(Nro_Pedido),
+FOREIGN KEY(Cod_Pedido) REFERENCES PEDIDO(cod_Pedido),
 FOREIGN KEY(Id_Oficina) REFERENCES OFICINA(Id_Oficina)
 )
+
+###### tipo de documento#########
+CREATE TABLE Tipo(
+Id_Tipo INT IDENTITY (1,1),
+tipo VARCHAR(50),
+descripcion VARCHAR(200),
+PRIMARY KEY(Id_Tipo))
+
+########Expediente################
+CREATE TABLE EXPEDIENTE(
+Id_Expediente INT IDENTITY(1,1),
+Id_Oficina VARCHAR(5),
+Nro_Expediente INT,
+Anio INT,
+PRIMARY KEY(Id_Expediente),
+FOREIGN KEY(Id_Oficina) REFERENCES OFICINA(Id_Oficina))

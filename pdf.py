@@ -5,7 +5,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from datetime import datetime
 
 class PDF():
-	def __init__(self,nro_expediente):
+	def __init__(self,nro_expediente,Razon,Asunto):
 		self.fecha_Actual=datetime.now()
 		pdfmetrics.registerFont(TTFont('Banana','Heavitas.ttf'))
 		self.NroExpediente=nro_expediente
@@ -21,15 +21,19 @@ class PDF():
 		self.Hoja.setFont('Banana',8)
 		self.Hoja.setFillColorRGB(0,0,0) 
 		self.Hoja.drawString(10,self.height-130,"Nombre y Razon:")
-		self.Hoja.drawString(100,self.height-130,".."*90)
+		self.Hoja.setFont('Helvetica',10)
+		self.Hoja.drawString(100,self.height-130,Razon)
+		self.Hoja.setFont('Banana',8)
 		self.Hoja.drawString(int(self.width*0.73),self.height-130,"Nro Reg:")
 		#self.Hoja.drawString(int(self.width*0.8),self.height-130,"..."*12)
 		self.Hoja.setFont('Banana',10)
 		self.Hoja.drawString(int(self.width*0.81),self.height-130,f"{self.fecha_Actual.strftime('%Y')}-{nro_expediente}")
 		self.Hoja.setFont('Banana',8)
 		self.Hoja.drawString(10,self.height-150,"Asunto:")
-		self.Hoja.drawString(100,self.height-150,"......"*40)
-		self.Hoja.drawString(100,self.height-170,"......"*40)
+		self.Hoja.setFont('Helvetica',10)
+		self.Hoja.drawString(100,self.height-150,Asunto)
+		#self.Hoja.drawString(100,self.height-170,"......"*40)
+		self.Hoja.setFont('Banana',8)
 		self.set_grilla(20,self.Hoja,self.height-int(self.height*0.75))
 		self.cabecera(self.Hoja)
 		self.Leyenda(10,200)

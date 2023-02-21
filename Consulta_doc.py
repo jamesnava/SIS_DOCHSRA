@@ -9,7 +9,7 @@ class querys(object):
 		
 	def query_User(self,usuario,contra):
 		rows=[]
-		sql=f"""SELECT * FROM USUARIO WHERE Usuario='{usuario}' AND Contrasenia='{contra}'"""
+		sql=f"""SELECT USUARIO.Usuario,USUARIO.estado,ROL.Rol FROM USUARIO INNER JOIN ROL ON USUARIO.Id_Rol=ROL.Id_Rol AND Usuario='{usuario}' AND Contrasenia='{contra}'"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
@@ -24,6 +24,12 @@ class querys(object):
 	def query_Max(self):
 		rows=[]
 		sql=f"""SELECT MAX(Nro_Tramite) AS nro FROM PEDIDO WHERE anio=(SELECT YEAR(GETDATE()))"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+	def query_MaxTable(self,table,retornar):
+		rows=[]
+		sql=f"""SELECT MAX({retornar}) AS nro FROM {table}"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
@@ -81,8 +87,11 @@ class querys(object):
 		sql=f"""INSERT INTO ACCION VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}','{datos[8]}')"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
-	
 
+	def Insert_Expediente(self,datos):
+		sql=f"""INSERT INTO EXPEDIENTE VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}')"""
+		self.cursor.execute(sql)
+		self.cursor.commit()
 	def query_OficinaMUser(self,usuario):
 		rows=[]
 		sql=f"""SELECT * FROM USUARIO AS US INNER JOIN OFICINA AS O ON US.Id_Oficina=O.Id_Oficina AND US.Usuario='{usuario}'"""
@@ -92,16 +101,17 @@ class querys(object):
 
 	def query_DocXEstado(self,idoficina,estado):
 		rows=[]
-		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Descripcion,P.Tipo,P.Oficina FROM ACCION AS A INNER JOIN
-		 PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido AND A.Id_Oficina='{idoficina}' AND A.Id_Estado={estado} AND A.Manejador=0"""
+		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Razon,P.Asunto,P.Nro_Pedido,P.Oficina,A.Observacion,A.Fecha,EX.Nro_Expediente,T.tipo FROM ACCION AS A INNER JOIN
+		 PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente 
+		 INNER JOIN Tipo AS T ON T.Id_Tipo=EX.Id_Tipo  AND A.Id_Oficina='{idoficina}' AND A.Id_Estado={estado} AND A.Manejador=0"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
 
 	def query_PedidoAccion(self,codigoPedido,id_Accion):
 		rows=[]
-		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Descripcion,P.Tipo,P.Oficina FROM ACCION AS A INNER JOIN
-		 PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido AND A.Cod_Pedido='{codigoPedido}' AND A.Id_Accion={id_Accion}"""
+		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Descripcion,P.Tipo,P.Oficina,EX.Nro_Expediente FROM ACCION AS A INNER JOIN
+		 PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente AND A.Cod_Pedido='{codigoPedido}' AND A.Id_Accion={id_Accion}"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
@@ -113,19 +123,20 @@ class querys(object):
 		rows=self.cursor.fetchall()
 		return rows
 
-	def query_Seguimiento(self,nroPedido,anio):
+	def query_Seguimiento(self,nroPedido,anio,oficina,tipo):
 		
 		rows=[]
-		sql=f"""SELECT P.Nro_Pedido,P.Asunto,A.Fecha,A.Id_Estado,A.Id_Oficina,A.Fecha AS Presentado 
-		FROM PEDIDO AS P INNER JOIN ACCION as A ON P.cod_Pedido=A.Cod_Pedido AND P.Nro_Tramite={nroPedido} AND P.anio='{anio}'"""
+		sql=f"""SELECT P.cod_Pedido,P.Razon,A.Observacion,P.Nro_Pedido,A.Fecha,EX.Nro_Expediente,A.Id_Oficina,E.Estado FROM PEDIDO AS P INNER JOIN ACCION AS A ON P.cod_Pedido=A.Cod_Pedido 
+		INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente INNER JOIN OFICINA AS F ON EX.Id_Oficina=F.Id_Oficina INNER JOIN Tipo AS T ON 
+ 		EX.Id_Tipo=T.Id_Tipo INNER JOIN ESTADO AS E ON A.Id_Estado=E.Id_Estado AND T.tipo='{tipo}' AND F.Oficina='{oficina}' AND EX.Anio='{anio}' AND EX.Nro_Expediente={nroPedido}"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
 
 	def documentos_EmitidosUpdate(self,Id_estado,Manejador,ASOC_OFICINA):
 		rows=[]
-		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Descripcion,O.Oficina FROM PEDIDO AS P INNER JOIN ACCION AS A 
-		ON P.cod_Pedido=A.Cod_Pedido INNER JOIN OFICINA AS O ON A.Id_Oficina=O.Id_Oficina AND A.Id_Estado={Id_estado} AND
+		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Razon,P.Asunto,P.Descripcion,O.Oficina,EX.Nro_Expediente,P.Fecha FROM PEDIDO AS P INNER JOIN ACCION AS A
+		ON P.cod_Pedido=A.Cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente INNER JOIN OFICINA AS O ON A.Id_Oficina=O.Id_Oficina AND A.Id_Estado={Id_estado} AND
 		 A.Manejador={Manejador} AND A.ASOC_OFICINA='{ASOC_OFICINA}'"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
@@ -153,6 +164,25 @@ class querys(object):
 		sql=f"""UPDATE ACCION SET Id_Oficina='{Id_oficina}' WHERE Id_Accion='{id_accion}'"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
+	def consulta_MaxExpedienteInterno(self,Oficina):
+		rows=[]
+		sql=f"""SELECT MAX(E.Nro_Expediente) AS nro FROM EXPEDIENTE AS E INNER JOIN Tipo AS T ON E.Id_Tipo=T.Id_Tipo AND E.anio=(SELECT YEAR(GETDATE())) AND ( E.Id_Oficina='{Oficina}' AND T.tipo='INTERNO')"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+
+	def consulta_MaxExpedienteExterno(self,Oficina):
+		rows=[]
+		sql=f"""SELECT MAX(E.Nro_Expediente) AS nro FROM EXPEDIENTE AS E INNER JOIN Tipo AS T ON E.Id_Tipo=T.Id_Tipo AND E.anio=(SELECT YEAR(GETDATE())) AND ( E.Id_Oficina='{Oficina}' AND T.tipo='EXTERNO')"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+	def consulta_PedidoPdf(self,codigo):
+		rows=[]
+		sql=f"SELECT P.*,EX.Nro_Expediente FROM PEDIDO AS P INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente AND P.cod_Pedido='{codigo}'"
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
 			
 		#rows=self.cursor.fetchall()
 		#return rows

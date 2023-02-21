@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
+from ttkthemes import ThemedTk
 import usuario
 import V_Main
 import time
@@ -10,7 +11,7 @@ class Login():
 	def __init__(self):
 		self.obj_usuario=usuario.usuario()
 		font_label=('Candara',16)
-		self.root=Tk()
+		self.root=ThemedTk(theme='blue')
 		#self.root.title('Buscar Establecimiento')
 		self.root.config(bg='#252F61')
 		self.root.resizable(width=False,height=False)
@@ -63,13 +64,13 @@ class Login():
 		try:
 			u=self.Entry_User.get()
 			c=self.Entry_Contra.get()			
-			identificador,usuario=self.obj_usuario.conectar(u,c)
+			identificador,usuario,rol,estado=self.obj_usuario.conectar(u,c)
 			if identificador==-1:
 				messagebox.showerror('Alerta','Datos Incorrectos o el usuario no Existe')
 				self.Entry_User.delete(0,'end')
 				self.Entry_Contra.delete(0,'end')
 				self.Entry_User.focus()
-			elif identificador==1:			
+			elif identificador==1 and estado=="ACTIVO":			
 				for i in range(0,100,5):				
 					self.bar['value']+=5
 					self.root.update()
@@ -78,10 +79,17 @@ class Login():
 						break
 				#self.root.withdraw()
 				self.root.destroy()
-				V_Main.Ventana_Principal(usuario)			
+				V_Main.Ventana_Principal(usuario,rol)
+
+			elif estado=="INACTIVO":
+				messagebox.showerror('Alerta','Usuario Inactivo')
+				self.Entry_User.delete(0,'end')
+				self.Entry_Contra.delete(0,'end')
+				self.Entry_User.focus()
 
 		except Exception as e:
 			raise e	
 
-Login()
+if __name__=="__main__":
+	Login()
 

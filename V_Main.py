@@ -1,4 +1,5 @@
 from tkinter import *
+from ttkthemes import ThemedTk
 import datetime
 from tkinter import ttk
 from tkinter import messagebox
@@ -12,50 +13,108 @@ import time
 
 class Ventana_Principal(object):
 	"""docstring for Ventana_Principal"""
-	def __init__(self,usuario):
+	def __init__(self,usuario,rol):
 		self.hora=datetime.datetime.now()
 		self.usuario=usuario
 		self.letra_leyenda=('Candara',16,'bold italic')		
 	
-		self.ventana=Tk()
+		self.ventana=ThemedTk(theme='arc')
 		self.ventana.title('Seguimiento Documentario')
 		 
 		self.ventana.iconbitmap('image/libro.ico')		
 		self.height=int(self.ventana.winfo_screenheight()*0.92)
-		self.width=int(self.ventana.winfo_screenwidth()*0.9)		
+		self.width=int(self.ventana.winfo_screenwidth()*0.98)		
 		self.ventana.geometry("%dx%d" % (self.width,self.height)+"+0+0")
 		self.ventana.resizable(0,0)
 		#frame principal
+		#647B7B
 		self.Frame_Principal=Frame(self.ventana,bg='#647B7B',width=self.width,height=int(self.height*0.95))
 		self.Frame_Principal.pack()
 		#agregando menu
 		self.Barra_Menu=Menu(self.ventana)
 		self.ventana['menu']=self.Barra_Menu
-		#creando menu configuracion
-		self.M_Configuracion=Menu(self.Barra_Menu,tearoff=False)
-		self.M_Configuracion.add_command(label='Restablecer Contraseña',command=self.Cambiar_Contrasenia)
-		self.M_Configuracion.add_command(label='Minimizar',command=self.ventana.iconify)
-		self.M_Configuracion.add_command(label='Cerrar',command=self.ventana.destroy)
-		self.M_Configuracion.add_separator()		
-		self.Barra_Menu.add_cascade(label='Archivo',menu=self.M_Configuracion)
 
-		# creando menu Acciones
-		self.M_Acciones=Menu(self.Barra_Menu,tearoff=False)
-		self.M_Acciones.add_command(label='Generar Documento',command=self.M_GenerarDocumento)
-		self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)				
-		self.M_Acciones.add_command(label='Seguimiento',command=self.Seguimiento_Documentario)
-		self.M_Acciones.add_command(label='Historial de Documentos',command=self.Historial_Documentario)
-		#self.M_Acciones.add_command(label='Imprimir Hoja de Tramite')
-		self.M_Acciones.add_separator()		
-		self.Barra_Menu.add_cascade(label='Documentos',menu=self.M_Acciones)
-				
-		#Ayuda...
-		self.M_Ayuda=Menu(self.Barra_Menu,tearoff=False)
-		self.M_Ayuda.add_command(label='Acerca de...',command=self.acercade)
-		self.M_Ayuda.add_command(label='Desarrollado por...', command=self.autor)		
-		self.M_Ayuda.add_separator()		
-		self.Barra_Menu.add_cascade(label='Ayuda',menu=self.M_Ayuda)
-		self.agregar_bottom()
+		if rol=='ADMINISTRADOR':
+			self.M_Configuracion=Menu(self.Barra_Menu,tearoff=False)
+			self.M_Configuracion.add_command(label='Restablecer Contraseña',command=self.Cambiar_Contrasenia)
+			self.M_Configuracion.add_command(label='Minimizar',command=self.ventana.iconify)
+			self.M_Configuracion.add_command(label='Cerrar',command=self.ventana.destroy)
+			self.M_Configuracion.add_separator()		
+			self.Barra_Menu.add_cascade(label='Archivo',menu=self.M_Configuracion)
+			#creando menu configuracion
+			self.M_Usuario=Menu(self.Barra_Menu,tearoff=False)
+			self.M_Usuario.add_command(label='Agregar Usuario')
+			self.M_Usuario.add_command(label='Listar Usuario')		
+			self.M_Usuario.add_separator()		
+			self.Barra_Menu.add_cascade(label='Usuarios',menu=self.M_Usuario)
+
+			# creando menu Acciones
+			self.M_Acciones=Menu(self.Barra_Menu,tearoff=False)
+			self.M_Acciones.add_command(label='Generar Documento',command=self.M_GenerarDocumento)
+			self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)				
+			self.M_Acciones.add_command(label='Seguimiento',command=self.Seguimiento_Documentario)
+			self.M_Acciones.add_command(label='Historial de Documentos',command=self.Historial_Documentario)
+			#self.M_Acciones.add_command(label='Imprimir Hoja de Tramite')
+			self.M_Acciones.add_separator()		
+			self.Barra_Menu.add_cascade(label='Documentos',menu=self.M_Acciones)				
+			#Ayuda...
+			self.M_Ayuda=Menu(self.Barra_Menu,tearoff=False)
+			self.M_Ayuda.add_command(label='Acerca de...',command=self.acercade)
+			self.M_Ayuda.add_command(label='Desarrollado por...', command=self.autor)		
+			self.M_Ayuda.add_separator()		
+			self.Barra_Menu.add_cascade(label='Ayuda',menu=self.M_Ayuda)
+			self.agregar_bottom()
+		elif rol=='ROL1':
+			self.M_Configuracion=Menu(self.Barra_Menu,tearoff=False)
+			self.M_Configuracion.add_command(label='Restablecer Contraseña',command=self.Cambiar_Contrasenia)
+			self.M_Configuracion.add_command(label='Minimizar',command=self.ventana.iconify)
+			self.M_Configuracion.add_command(label='Cerrar',command=self.ventana.destroy)
+			self.M_Configuracion.add_separator()		
+			self.Barra_Menu.add_cascade(label='Archivo',menu=self.M_Configuracion)	
+
+			# creando menu Acciones
+			self.M_Acciones=Menu(self.Barra_Menu,tearoff=False)
+			self.M_Acciones.add_command(label='Generar Documento',command=self.M_GenerarDocumento)
+			self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)				
+			self.M_Acciones.add_command(label='Seguimiento',command=self.Seguimiento_Documentario)
+			self.M_Acciones.add_command(label='Historial de Documentos',command=self.Historial_Documentario)
+			#self.M_Acciones.add_command(label='Imprimir Hoja de Tramite')
+			self.M_Acciones.add_separator()		
+			self.Barra_Menu.add_cascade(label='Documentos',menu=self.M_Acciones)				
+			#Ayuda...
+			self.M_Ayuda=Menu(self.Barra_Menu,tearoff=False)
+			self.M_Ayuda.add_command(label='Acerca de...',command=self.acercade)
+			self.M_Ayuda.add_command(label='Desarrollado por...', command=self.autor)		
+			self.M_Ayuda.add_separator()		
+			self.Barra_Menu.add_cascade(label='Ayuda',menu=self.M_Ayuda)
+			self.agregar_bottom()
+		elif rol=='ROL2':
+			self.M_Configuracion=Menu(self.Barra_Menu,tearoff=False)
+			self.M_Configuracion.add_command(label='Restablecer Contraseña',command=self.Cambiar_Contrasenia)
+			self.M_Configuracion.add_command(label='Minimizar',command=self.ventana.iconify)
+			self.M_Configuracion.add_command(label='Cerrar',command=self.ventana.destroy)
+			self.M_Configuracion.add_separator()		
+			self.Barra_Menu.add_cascade(label='Archivo',menu=self.M_Configuracion)	
+
+			# creando menu Acciones
+			self.M_Acciones=Menu(self.Barra_Menu,tearoff=False)
+			#self.M_Acciones.add_command(label='Generar Documento',command=self.M_GenerarDocumento)
+			self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)				
+			self.M_Acciones.add_command(label='Seguimiento',command=self.Seguimiento_Documentario)
+			self.M_Acciones.add_command(label='Historial de Documentos',command=self.Historial_Documentario)
+			#self.M_Acciones.add_command(label='Imprimir Hoja de Tramite')
+			self.M_Acciones.add_separator()		
+			self.Barra_Menu.add_cascade(label='Documentos',menu=self.M_Acciones)				
+			#Ayuda...
+			self.M_Ayuda=Menu(self.Barra_Menu,tearoff=False)
+			self.M_Ayuda.add_command(label='Acerca de...',command=self.acercade)
+			self.M_Ayuda.add_command(label='Desarrollado por...', command=self.autor)		
+			self.M_Ayuda.add_separator()		
+			self.Barra_Menu.add_cascade(label='Ayuda',menu=self.M_Ayuda)
+			self.agregar_bottom()
+		# USUARIOS
+
+		
 
 	def Return_Office(self):
 		obj_consulta=Consulta_doc.querys()
@@ -63,12 +122,14 @@ class Ventana_Principal(object):
 		return rows[0].Id_Oficina,rows[0].dni
 
 	def agregar_bottom(self):		
-		self.Frame_Bottom=Frame(self.ventana,bg='#647B7B',width=self.width,height=int(self.height*0.05))
+		self.Frame_Bottom=Frame(self.ventana,bg='blue',width=self.width,height=int(self.height*0.05))
 		self.Frame_Bottom.pack(side='bottom')
 		etiqueta_usuario=Label(self.Frame_Bottom,text='Usuario: ',font=('Candara',11,'bold italic')	)
 		etiqueta_usuario.grid(row=0,column=0)
 		etiqueta_UsuarioValor=Label(self.Frame_Bottom,text=self.usuario,font=('Candara',11,'bold italic'))
-		etiqueta_UsuarioValor.grid(row=0,column=1)		
+		etiqueta_UsuarioValor.grid(row=0,column=1)
+		etiqueta_UsuarioValor=Label(self.Frame_Bottom,text='Version: 1.3',font=('Candara',11,'bold italic'))
+		etiqueta_UsuarioValor.grid(row=0,column=2)			
 
 	def M_GenerarDocumento(self):
 		oficina,usuario=self.Return_Office()
@@ -81,6 +142,7 @@ class Ventana_Principal(object):
 
 	def bandeja_Entrada(self):
 		oficina,usuario=self.Return_Office()
+		#647B7B
 		self.Frame_Bandeja=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
 		self.Frame_Bandeja.place(x=10,y=10)
 		self.Frame_Bandeja.grid_propagate(False)
@@ -127,6 +189,7 @@ class Ventana_Principal(object):
 		btn_CancelarC=Button(Top_Contrasenia,text='Cancelar')
 		btn_CancelarC['command']=Top_Contrasenia.destroy
 		btn_CancelarC.grid(row=3,column=2,pady=10,padx=10)
+		
 	def UpdatePass(self,usuario,contraA,contraN,Top_Contrasenia):
 		obj_querys=Consulta_doc.querys()
 
@@ -143,7 +206,7 @@ class Ventana_Principal(object):
 			messagebox.showerror('Error',e)
 
 	def acercade(self):
-		messagebox.showinfo('informacion del software',"""Sistema de seguimiento documentario, version 1.1""")
+		messagebox.showinfo('informacion del software',"""Sistema de seguimiento documentario, version 1.3""")
 	def autor(sel):
 		messagebox.showinfo('Desarrollado por',"""El sistema de seguimiento documentario fue desarrollado por la\nUNIDAD DE ESTADISTICA E INFORMATICA a través de la oficina de\nDESARROLLO DE SOFTWARE del Hospital Sub Regional de Andahuaylas\nTodos los derechos reservado ®2023\nby JAIME NAVARRO CRUZ- navarrocruzjaime@gmail.com""")
 
