@@ -84,7 +84,7 @@ class querys(object):
 		rows=self.cursor.fetchall()
 		return rows
 	def Insert_Accion(self,datos):
-		sql=f"""INSERT INTO ACCION VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}','{datos[8]}')"""
+		sql=f"""INSERT INTO ACCION VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}','{datos[8]}',{datos[9]})"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
 
@@ -137,7 +137,7 @@ class querys(object):
 		rows=[]
 		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Razon,P.Asunto,P.Descripcion,O.Oficina,EX.Nro_Expediente,P.Fecha FROM PEDIDO AS P INNER JOIN ACCION AS A
 		ON P.cod_Pedido=A.Cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente INNER JOIN OFICINA AS O ON A.Id_Oficina=O.Id_Oficina AND A.Id_Estado={Id_estado} AND
-		 A.Manejador={Manejador} AND A.ASOC_OFICINA='{ASOC_OFICINA}'"""
+		 A.Manejador={Manejador} AND A.ASOC_OFICINA='{ASOC_OFICINA}' AND A.Ingreso_nuevo={1}"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
@@ -179,7 +179,8 @@ class querys(object):
 		return rows
 	def consulta_PedidoPdf(self,codigo):
 		rows=[]
-		sql=f"SELECT P.*,EX.Nro_Expediente FROM PEDIDO AS P INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente AND P.cod_Pedido='{codigo}'"
+		sql=f"""SELECT P.*,T.tipo,EX.Nro_Expediente FROM PEDIDO AS P INNER JOIN EXPEDIENTE AS EX 
+		ON P.Id_Expediente=EX.Id_Expediente INNER JOIN Tipo AS T ON T.Id_Tipo=EX.Id_Tipo AND P.cod_Pedido='{codigo}'"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows

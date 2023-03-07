@@ -172,10 +172,12 @@ class Documentos():
 			messagebox.showinfo('Alerta',f'Error {e}')
 	
 	def llenar_tableDocumentos(self):
+
 		self.delete_table(self.table_Documentos)
 		rows=self.obj_consultas.documentos_EmitidosUpdate(2,0,self.oficinaG)
 		for valor in rows:
 			self.table_Documentos.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Nro_Pedido,valor.Razon,valor.Asunto,valor.Descripcion,valor.Oficina,valor.Nro_Expediente,valor.Fecha))
+
 	def eliminar_Documento(self):
 
 		if self.table_Documentos.selection():
@@ -286,7 +288,7 @@ class Documentos():
 
 				
 		#reestriccion de pedido
-		datosAccion=[codigo_Pedido,fecha,codigo_Usuario,'ninguna',2,codigo_Oficina_Derivar,0,anio,oficina_Generadora]
+		datosAccion=[codigo_Pedido,fecha,codigo_Usuario,'ninguna',2,codigo_Oficina_Derivar,0,anio,oficina_Generadora,1]
 		
 		if codigo_Oficina_Derivar!=oficina_Generadora:
 			if tipo=='INTERNO':				
@@ -322,8 +324,8 @@ class Documentos():
 		if self.table_Documentos.selection():			
 			codigo=self.table_Documentos.item(self.table_Documentos.selection()[0])['values'][1]
 			rows=self.obj_consultas.consulta_PedidoPdf(codigo)			
-			obj_pdf=pdf.PDF(rows[0].Nro_Expediente,rows[0].Razon,rows[0].Asunto)
-			if messagebox.askquestion('Atencion','Desea Imprimir el expediente'):
+			obj_pdf=pdf.PDF(rows[0].Nro_Expediente,rows[0].Razon,rows[0].Asunto,rows[0].tipo)
+			if messagebox.askquestion('Atencion','Desea Imprimir el expediente'):				
 				os.startfile('Expediente.pdf','print')
 				
 		else:
@@ -656,7 +658,8 @@ class Bandeja():
 				valores.append(0)
 				anio=self.fecha_Actual.strftime("%Y")
 				valores.append(anio)
-				valores.append(self.oficina)				
+				valores.append(self.oficina)
+				valores.append(0)				
 				#insertando accion
 				self.obj_consulta.Insert_Accion(valores)
 				self.Entry_nro['state']='normal'
@@ -677,7 +680,7 @@ class Bandeja():
 		if self.table_Derivar.selection():			
 			codigo=self.table_Derivar.item(self.table_Derivar.selection()[0])['values'][1]
 			rows=self.obj_consulta.consulta_PedidoPdf(codigo)			
-			obj_pdf=pdf.PDF(rows[0].Nro_Expediente,rows[0].Razon,rows[0].Asunto)
+			obj_pdf=pdf.PDF(rows[0].Nro_Expediente,rows[0].Razon,rows[0].Asunto,rows[0].tipo)
 			if messagebox.askquestion('Atencion','Desea Imprimir el expediente'):
 				os.startfile('Expediente.pdf','print')
 		else:

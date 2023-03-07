@@ -53,7 +53,7 @@ class Ventana_Principal(object):
 			self.M_Acciones.add_command(label='Generar Documento',command=self.M_GenerarDocumento)
 			self.M_Acciones.add_command(label='Bandeja de Entrada',command=self.bandeja_Entrada)				
 			self.M_Acciones.add_command(label='Seguimiento',command=self.Seguimiento_Documentario)
-			self.M_Acciones.add_command(label='Historial de Documentos',command=self.Historial_Documentario)
+			self.M_Acciones.add_command(label='Historial de Documentos',command=self.Historial_Documentario )
 			#self.M_Acciones.add_command(label='Imprimir Hoja de Tramite')
 			self.M_Acciones.add_separator()		
 			self.Barra_Menu.add_cascade(label='Documentos',menu=self.M_Acciones)				
@@ -64,6 +64,7 @@ class Ventana_Principal(object):
 			self.M_Ayuda.add_separator()		
 			self.Barra_Menu.add_cascade(label='Ayuda',menu=self.M_Ayuda)
 			self.agregar_bottom()
+			
 		elif rol=='ROL1':
 			self.M_Configuracion=Menu(self.Barra_Menu,tearoff=False)
 			self.M_Configuracion.add_command(label='Restablecer Contraseña',command=self.Cambiar_Contrasenia)

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Sis_Doc"
-#define MyAppVersion "1.2"
+#define MyAppVersion "1.3"
 #define MyAppPublisher "Jaime Navarro Cruz"
 #define MyAppURL "https://www.hospitalandahuaylas.gob.pe"
 #define MyAppExeName "logl_.exe"
@@ -13,7 +13,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{F51B61CE-BD68-4B32-87E6-C6769AE3974C}
+AppId={{F92BC042-FE88-4036-ACBF-77725D06563E}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -26,8 +26,8 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=commandline
-OutputBaseFilename=sisDoc_Setup
+PrivilegesRequiredOverridesAllowed=dialog
+OutputBaseFilename=mysetup
 SetupIconFile=C:\Users\ADMINISTRADOR\Desktop\Sist_DocHSRA\instal.ico
 Password=HSRA.2016
 Compression=lzma
