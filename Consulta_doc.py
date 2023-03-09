@@ -35,7 +35,7 @@ class querys(object):
 		return rows
 	#para recepcion
 	def Update_TableEstadoAccion(self,codigo,estado):
-		sql=f"""UPDATE ACCION SET Id_Estado={estado} WHERE Id_Accion='{codigo}'"""
+		sql=f"""UPDATE ACCION SET Id_Estado={estado}, Fecha=(SELECT CONCAT(CONVERT(varchar,GETDATE(),111),' ',CONVERT(VARCHAR,GETDATE(),108))) WHERE Id_Accion='{codigo}'"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
 	#para derivar o atender o rechazar
@@ -84,7 +84,12 @@ class querys(object):
 		rows=self.cursor.fetchall()
 		return rows
 	def Insert_Accion(self,datos):
-		sql=f"""INSERT INTO ACCION VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}','{datos[8]}',{datos[9]})"""
+		sql=f"""INSERT INTO ACCION VALUES('{datos[0]}','{datos[1]}','{datos[2]}','{datos[3]}','{datos[4]}','{datos[5]}','{datos[6]}','{datos[7]}','{datos[8]}','{datos[9]}',{datos[10]})"""
+		self.cursor.execute(sql)
+		self.cursor.commit()
+
+	def Insert_Correlativo(self,datos):
+		sql=f"""INSERT INTO CORRELATIVO VALUES({datos[0]},'{datos[1]}','{datos[2]}',{datos[3]})"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
 
@@ -101,9 +106,14 @@ class querys(object):
 
 	def query_DocXEstado(self,idoficina,estado):
 		rows=[]
-		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Razon,P.Asunto,P.Nro_Pedido,P.Oficina,A.Observacion,A.Fecha,EX.Nro_Expediente,T.tipo FROM ACCION AS A INNER JOIN
+		#sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Razon,P.Asunto,P.Nro_Pedido,P.Oficina,A.Observacion,A.Fecha,EX.Nro_Expediente,T.tipo FROM ACCION AS A INNER JOIN
+		#PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente 
+		#INNER JOIN Tipo AS T ON T.Id_Tipo=EX.Id_Tipo  AND A.Id_Oficina='{idoficina}' AND A.Id_Estado={estado} AND A.Manejador=0"""
+
+		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Razon,P.Asunto,P.Nro_Pedido,P.Oficina,A.Observacion,A.Fecha,EX.Nro_Expediente,T.tipo,CORR.nro_correlativo FROM ACCION AS A INNER JOIN
 		 PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente 
-		 INNER JOIN Tipo AS T ON T.Id_Tipo=EX.Id_Tipo  AND A.Id_Oficina='{idoficina}' AND A.Id_Estado={estado} AND A.Manejador=0"""
+		 INNER JOIN Tipo AS T ON T.Id_Tipo=EX.Id_Tipo INNER JOIN CORRELATIVO AS CORR ON CORR.AccionId=A.Id_Accion  AND A.Id_Oficina='{idoficina}' AND A.Id_Estado={estado} AND A.Manejador=0"""
+		 
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
@@ -177,6 +187,14 @@ class querys(object):
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
+
+	def consulta_MaxCorrelativo(self,Oficina):
+		rows=[]
+		sql=f"""SELECT MAX(nro_correlativo) as nro FROM CORRELATIVO WHERE anio=(SELECT YEAR(GETDATE())) AND oficina='{Oficina}'"""
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
+
 	def consulta_PedidoPdf(self,codigo):
 		rows=[]
 		sql=f"""SELECT P.*,T.tipo,EX.Nro_Expediente FROM PEDIDO AS P INNER JOIN EXPEDIENTE AS EX 
@@ -187,6 +205,7 @@ class querys(object):
 			
 		#rows=self.cursor.fetchall()
 		#return rows
+
 
 
 

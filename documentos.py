@@ -30,6 +30,13 @@ class Documentos():
 		self.Tipo_Documento=ttk.Combobox(self.Frame_Docs,values=lista_Tipo)
 		self.Tipo_Documento.current(0)
 		self.Tipo_Documento.grid(row=0,column=1)
+
+		etiqueta=Label(self.Frame_Docs,text='Multiple: ',bg='#647B7B',font=letra)
+		etiqueta.grid(row=1,column=0,sticky='w')
+		self.T_Doc=ttk.Combobox(self.Frame_Docs,values=['NO','SI'])
+		self.T_Doc.current(0)
+		self.T_Doc.bind("<<ComboboxSelected>>",self.event_combo)
+		self.T_Doc.grid(row=1,column=1)
 		
 		self.Entry_Codigo=Entry(self.Frame_Docs,width=40)
 		self.Entry_Codigo.insert('end',self.Generar_CodigoValido('PEDIDO','cod_Pedido'))
@@ -147,6 +154,12 @@ class Documentos():
 		self.etiqueta_print=ttk.Button(self.Frame_Docs,text='Imprimir Exp.',width=20,cursor='hand2')		
 		self.etiqueta_print.bind("<Button-1>",self.print_expediente)
 		self.etiqueta_print.grid(row=11,column=4)
+	def event_combo(self,event):
+		if self.T_Doc.get()=='SI':
+			self.Lista_Oficinas.config(selectmode='multiple')
+		else:
+			self.Lista_Oficinas.config(selectmode='single')
+		
 		
 	def Recuperar_OficinaGeneradora(self,usuario):
 		row=self.obj_consultas.query_OficinaMUser(usuario)
@@ -185,11 +198,16 @@ class Documentos():
 			codigo_pedido=self.table_Documentos.item(self.table_Documentos.selection()[0])['values'][1]
 			rows=self.obj_consultas.query_RetornaCodigo('PEDIDO',codigo_pedido,'cod_Pedido','Id_Expediente')
 			id_expediente=rows[0].Id_Expediente
+
 			#nro_expediente=self.table_Documentos.item(self.table_Documentos.selection()[0]['values'][7])
 
 			try:
-				
-				self.obj_consultas.delete_itemINT('ACCION','Id_Accion',codigo_Accion)
+								
+				rows_corr=self.obj_consultas.query_RetornaCodigo('ACCION',codigo_pedido,'Cod_Pedido','Id_Accion')
+				for eli in rows_corr:
+					self.obj_consultas.delete_itemINT('ACCION','Id_Accion',eli.Id_Accion)
+					self.obj_consultas.delete_itemINT('CORRELATIVO','AccionId',eli.Id_Accion)
+
 				self.obj_consultas.delete_itemSTR('PEDIDO','cod_Pedido',codigo_pedido)
 				self.obj_consultas.delete_itemINT('EXPEDIENTE','Id_Expediente',id_expediente)
 				self.llenar_tableDocumentos()
@@ -227,11 +245,15 @@ class Documentos():
 		datos.append(fecha)
 
 		#oficina
-		oficina_Derivar=self.Lista_Oficinas.selection_get()				
-		rows=self.obj_consultas.query_RetornaCodigo('OFICINA',oficina_Derivar,'Oficina','Id_Oficina')
-		codigo_Oficina_Derivar=rows[0].Id_Oficina	
-		#datos.append(codigo_Oficina)
+		oficinasList=[self.Lista_Oficinas.get(idx) for idx in self.Lista_Oficinas.curselection()]
 		
+		#oficina_Derivar=self.Lista_Oficinas.selection_get()
+		codiOficina=[]	
+		for ofi in oficinasList:
+			rows=self.obj_consultas.query_RetornaCodigo('OFICINA',ofi,'Oficina','Id_Oficina')
+			codiOficina.append(rows[0].Id_Oficina)	
+		#datos.append(codigo_Oficina)
+
 		#Oficina generadora
 		self.Entry_OficinaG['state']='normal'
 		oficina_Generadora=self.Entry_OficinaG.get()[:5]
@@ -286,22 +308,69 @@ class Documentos():
 		Hora=self.fecha_Actual.strftime("%H:%M")
 		datos.append(Hora)
 
-				
-		#reestriccion de pedido
-		datosAccion=[codigo_Pedido,fecha,codigo_Usuario,'ninguna',2,codigo_Oficina_Derivar,0,anio,oficina_Generadora,1]
+
+		datosAccionGeneradora=[]
+		datosAccion=[]
+		datosCorrelativo=[]
+		nro_Accion=0
+		rows_accion=self.obj_consultas.query_MaxTable('ACCION','Id_Accion')			
+		if rows_accion[0].nro==None:
+			nro_Accion=1
+		else:
+			nro_Accion=rows_accion[0].nro+1
+		nro_Accion1=nro_Accion
+		datosAccionGeneradora=[nro_Accion1,codigo_Pedido,fecha,codigo_Usuario,'ninguna',1,oficina_Generadora,1,anio,oficina_Generadora,1]
+		rows_=self.obj_consultas.consulta_MaxCorrelativo(oficina_Generadora)
+		nro_corre1=0
+		if rows_[0].nro==None:
+			nro_corre1=1
+		else:
+			nro_corre1=rows_[0].nro+1
+
+		datosCorrelativoGeneradora=[nro_corre1,anio,oficina_Generadora,nro_Accion1]
+
+
+
+		nro_Accion2=nro_Accion1
+
 		
-		if codigo_Oficina_Derivar!=oficina_Generadora:
+
+		for v in codiOficina:				
+			#reestriccion de pedido		
+			nro_Accion2=nro_Accion2+1			
+			datosAccion.append([nro_Accion2,codigo_Pedido,fecha,codigo_Usuario,'ninguna',2,v,0,anio,oficina_Generadora,1])
+			nro_corre=0
+			rows=self.obj_consultas.consulta_MaxCorrelativo(v)			
+			if rows[0].nro==None:
+				nro_corre=1
+			else:
+				nro_corre=rows[0].nro+1
+				
+			datosCorrelativo.append([nro_corre,anio,v,nro_Accion2])
+		print(datosAccion)
+		print(datosCorrelativo)
+
+	#FALTAAAAA::::::::::::::AGREGAR ACCION:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+	"""	if codigo_Oficina_Derivar!=oficina_Generadora:
 			if tipo=='INTERNO':				
 				self.obj_consultas.Insert_Expediente(expendiente_data)
 				self.obj_consultas.query_InsertarPedido(datos)
+				self.obj_consultas.Insert_Accion(datosAccionGeneradora)
 				self.obj_consultas.Insert_Accion(datosAccion)
+				self.obj_consultas.Insert_Correlativo(datosCorrelativoGeneradora)
+				self.obj_consultas.Insert_Correlativo(datosCorrelativo)
 				messagebox.showinfo('Notificación','se registró correctamiento!!')
+				#print(datosCorrelativo)
 				self.Capa()				
 
 			elif tipo=='EXTERNO' and oficina_Generadora=='AAAAA':	
 				self.obj_consultas.Insert_Expediente(expendiente_data)
 				self.obj_consultas.query_InsertarPedido(datos)
+				self.obj_consultas.Insert_Accion(datosAccionGeneradora)
 				self.obj_consultas.Insert_Accion(datosAccion)
+				self.obj_consultas.Insert_Correlativo(datosCorrelativoGeneradora)
+				self.obj_consultas.Insert_Correlativo(datosCorrelativo)
 				messagebox.showinfo('Notificación','se registró correctamente!!')
 				self.Capa()
 			else:
@@ -309,7 +378,7 @@ class Documentos():
 			
 			self.llenar_tableDocumentos()
 		else:
-			messagebox.showerror('Error','No se puede derivar a la misma oficina')
+			messagebox.showerror('Error','No se puede derivar a la misma oficina')"""
 
 	def Capa(self):
 		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.7),height=int(self.height*0.88))
@@ -427,7 +496,7 @@ class Bandeja():
 		self.Frame_Docs.grid_propagate(False)
 		etiqueta=Label(self.Frame_Docs,text='DOCUMENTOS POR RECEPCIONAR',width=int(width*0.1),font=letra,bg="#34A2DE")
 		etiqueta.place(x=0,y=10)
-		self.table_Recepcionar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8'),show='headings')				
+		self.table_Recepcionar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9'),show='headings')				
 		#self.table_Recepcionar.column("#0",width=600)
 		self.table_Recepcionar.heading("#1",text="Nro")
 		self.table_Recepcionar.column("#1",width=0,anchor="w",stretch='NO')
@@ -444,7 +513,9 @@ class Bandeja():
 		self.table_Recepcionar.heading("#7",text="Fecha")
 		self.table_Recepcionar.column("#7",width=150,anchor="w")
 		self.table_Recepcionar.heading("#8",text="Nro Expediente")
-		self.table_Recepcionar.column("#8",width=150,anchor="w")		
+		self.table_Recepcionar.column("#8",width=150,anchor="w")
+		self.table_Recepcionar.heading("#9",text="Correlativo")
+		self.table_Recepcionar.column("#9",width=50,anchor="w")		
 		self.table_Recepcionar.place(x=int(width*0.03),y=60,width=int(width*0.85),height=220)		
 		self.llenar_TablaRecepcionar()
 		btn_AccionR=ttk.Button(self.Frame_Docs,text="Recepcionar",width=20,cursor='hand2')
@@ -456,7 +527,7 @@ class Bandeja():
 		etiqueta=Label(self.Frame_Docs,text='DOCUMENTOS POR ATENDER',bg='#34A2DE',width=int(width*0.1),font=letra)
 		etiqueta.place(x=0,y=int(height*0.5))
 
-		self.table_Derivar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8'),show='headings')				
+		self.table_Derivar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9'),show='headings')				
 		
 		self.table_Derivar.heading("#1",text="Nro")
 		self.table_Derivar.column("#1",width=0,anchor="w",stretch='NO')
@@ -474,6 +545,8 @@ class Bandeja():
 		self.table_Derivar.column("#7",width=150,anchor="w")
 		self.table_Derivar.heading("#8",text="Nro Expediente")
 		self.table_Derivar.column("#8",width=150,anchor="w")
+		self.table_Derivar.heading("#9",text="Correlativo")
+		self.table_Derivar.column("#9",width=50,anchor="w")
 
 		self.table_Derivar.place(x=int(width*0.03),y=int(height*0.55),width=int(width*0.85),height=220)
 		self.llenar_TablaDerivar()
@@ -492,7 +565,7 @@ class Bandeja():
 		rows=self.obj_consulta.query_DocXEstado(self.oficina,2)		
 		for valor in rows:
 			rows_Oficina=self.obj_consulta.query_RetornaCodigo('OFICINA',valor.Oficina,'Id_Oficina','Oficina')
-			self.table_Recepcionar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,valor.Fecha,valor.Nro_Expediente))
+			self.table_Recepcionar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,valor.Fecha,valor.Nro_Expediente,valor.nro_correlativo))
 
 
 	def llenar_TablaDerivar(self):
@@ -500,7 +573,7 @@ class Bandeja():
 		rows=self.obj_consulta.query_DocXEstado(self.oficina,1)		
 		for valor in rows:
 			rows_Oficina=self.obj_consulta.query_RetornaCodigo('OFICINA',valor.Oficina,'Id_Oficina','Oficina')
-			self.table_Derivar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,valor.Fecha,valor.Nro_Expediente))
+			self.table_Derivar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,valor.Fecha,valor.Nro_Expediente,valor.nro_correlativo))
 
 
 	def delete_table(self,table):
@@ -626,6 +699,16 @@ class Bandeja():
 	def Derivar_Doc(self):
 		
 		valores=[]
+
+		rows_accion=self.obj_consulta.query_MaxTable('ACCION','Id_Accion')
+		nro_Accion=0
+		if rows_accion[0].nro==None:
+			nro_Accion=1
+		else:
+			nro_Accion=rows_accion[0].nro+1
+
+		valores.append(nro_Accion)
+
 		self.Entry_RCodigo['state']='normal'
 		codigo_pedido=self.Entry_RCodigo.get()
 		valores.append(codigo_pedido)		
@@ -662,6 +745,18 @@ class Bandeja():
 				valores.append(0)				
 				#insertando accion
 				self.obj_consulta.Insert_Accion(valores)
+				#insertando correlativo
+				rows=self.obj_consulta.consulta_MaxCorrelativo(id_oficina)
+				nro_corre=0
+				if rows[0].nro==None:
+					nro_corre=1
+				else:
+					nro_corre=rows[0].nro+1
+
+				datosCorrelativo=[nro_corre,anio,id_oficina,nro_Accion]
+				self.obj_consulta.Insert_Correlativo(datosCorrelativo)
+
+				#fin de insertar correlativo
 				self.Entry_nro['state']='normal'
 				id_Accion=self.Entry_nro.get()
 				#hereeeeeee....!!

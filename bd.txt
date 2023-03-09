@@ -55,7 +55,7 @@ PRIMARY KEY (Id_Estado)
 
 # creando la tabla accion
 CREATE TABLE ACCION(
-Id_Accion INT IDENTITY (1,1),
+Id_Accion INT,
 Cod_Pedido VARCHAR(5),
 Fecha DATETIME,
 Usuario VARCHAR(10),
@@ -87,3 +87,10 @@ Nro_Expediente INT,
 Anio INT,
 PRIMARY KEY(Id_Expediente),
 FOREIGN KEY(Id_Oficina) REFERENCES OFICINA(Id_Oficina))
+
+########CORRELATIVO###############
+CREATE TABLE CORRELATIVO(
+nro_correlativo INT,
+anio VARCHAR(5),
+oficina VARCHAR(5)
+)
