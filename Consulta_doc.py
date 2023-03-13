@@ -35,7 +35,7 @@ class querys(object):
 		return rows
 	#para recepcion
 	def Update_TableEstadoAccion(self,codigo,estado):
-		sql=f"""UPDATE ACCION SET Id_Estado={estado}, Fecha=(SELECT CONCAT(CONVERT(varchar,GETDATE(),111),' ',CONVERT(VARCHAR,GETDATE(),108))) WHERE Id_Accion='{codigo}'"""
+		sql=f"""UPDATE ACCION SET Id_Estado={estado}, Fecha=(CONVERT(DATETIME,GETDATE(),20)) WHERE Id_Accion='{codigo}'"""
 		self.cursor.execute(sql)
 		self.cursor.commit()
 	#para derivar o atender o rechazar
@@ -138,7 +138,7 @@ class querys(object):
 		rows=[]
 		sql=f"""SELECT P.cod_Pedido,P.Razon,A.Observacion,P.Nro_Pedido,A.Fecha,EX.Nro_Expediente,A.Id_Oficina,E.Estado FROM PEDIDO AS P INNER JOIN ACCION AS A ON P.cod_Pedido=A.Cod_Pedido 
 		INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente INNER JOIN OFICINA AS F ON EX.Id_Oficina=F.Id_Oficina INNER JOIN Tipo AS T ON 
- 		EX.Id_Tipo=T.Id_Tipo INNER JOIN ESTADO AS E ON A.Id_Estado=E.Id_Estado AND T.tipo='{tipo}' AND F.Oficina='{oficina}' AND EX.Anio='{anio}' AND EX.Nro_Expediente={nroPedido}"""
+ 		EX.Id_Tipo=T.Id_Tipo INNER JOIN ESTADO AS E ON A.Id_Estado=E.Id_Estado AND T.tipo='{tipo}' AND F.Oficina='{oficina}' AND EX.Anio='{anio}' AND EX.Nro_Expediente={nroPedido} ORDER BY A.Fecha DESC"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows

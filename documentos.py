@@ -7,6 +7,7 @@ from datetime import datetime
 from PIL import Image
 import pdf
 import os
+import requests
 class Documentos():
 	def __init__(self,oficina,usuario):
 		self.oficinaG=oficina
@@ -51,7 +52,10 @@ class Documentos():
 
 		etiqueta=Label(self.Frame_Docs,text='Razon Social: ',font=letra,bg='#647B7B')
 		etiqueta.grid(row=0,column=2,sticky='e')
-		self.Entry_Razon=Entry(self.Frame_Docs,width=40)		
+		self.Entry_Razon=Entry(self.Frame_Docs,width=40)
+		#EVENTO
+		self.Entry_Razon.bind("<Return>",self.event_razon)
+		self.Entry_Razon.bind("<Button-1>",self.event_razonDelete)
 		self.Entry_Razon.grid(row=0,column=3,ipady=3)
 
 		etiqueta=Label(self.Frame_Docs,text='Asunto: ',bg='#647B7B',font=letra)
@@ -154,6 +158,18 @@ class Documentos():
 		self.etiqueta_print=ttk.Button(self.Frame_Docs,text='Imprimir Exp.',width=20,cursor='hand2')		
 		self.etiqueta_print.bind("<Button-1>",self.print_expediente)
 		self.etiqueta_print.grid(row=11,column=4)
+	def event_razon(self,event):
+		dni=self.Entry_Razon.get()
+		url=f'https://dniruc.apisperu.com/api/v1/dni/{dni}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Im5vZG9oc3JhQGdtYWlsLmNvbSJ9.WkIBBcgkPKa--f49K61ReAErp0JbrPu9wULMOaqR9_E'
+		response=requests.get(url)
+		if response.status_code==requests.codes.ok:
+			datos=response.json()
+			data_razon=datos.get('nombres')+" "+datos.get('apellidoPaterno')+" "+datos.get("apellidoMaterno")
+			self.Entry_Razon.delete(0,'end')
+			self.Entry_Razon.insert('end',data_razon)
+	def event_razonDelete(self,event):
+		self.Entry_Razon.delete(0,'end')
+
 	def event_combo(self,event):
 		if self.T_Doc.get()=='SI':
 			self.Lista_Oficinas.config(selectmode='multiple')
@@ -346,31 +362,34 @@ class Documentos():
 			else:
 				nro_corre=rows[0].nro+1
 				
-			datosCorrelativo.append([nro_corre,anio,v,nro_Accion2])
-		print(datosAccion)
-		print(datosCorrelativo)
+			datosCorrelativo.append([nro_corre,anio,v,nro_Accion2])		
 
-	#FALTAAAAA::::::::::::::AGREGAR ACCION:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-
-	"""	if codigo_Oficina_Derivar!=oficina_Generadora:
+	
+		if not (oficina_Generadora in codiOficina):
 			if tipo=='INTERNO':				
+
 				self.obj_consultas.Insert_Expediente(expendiente_data)
 				self.obj_consultas.query_InsertarPedido(datos)
 				self.obj_consultas.Insert_Accion(datosAccionGeneradora)
-				self.obj_consultas.Insert_Accion(datosAccion)
 				self.obj_consultas.Insert_Correlativo(datosCorrelativoGeneradora)
-				self.obj_consultas.Insert_Correlativo(datosCorrelativo)
-				messagebox.showinfo('Notificación','se registró correctamiento!!')
+				for valores in datosAccion:					
+					self.obj_consultas.Insert_Accion(valores)
+				for valores1 in datosCorrelativo:				
+					self.obj_consultas.Insert_Correlativo(valores1)
+				messagebox.showinfo('Notificación','se registró correctamente!!')
 				#print(datosCorrelativo)
-				self.Capa()				
+				self.Capa()		
 
 			elif tipo=='EXTERNO' and oficina_Generadora=='AAAAA':	
 				self.obj_consultas.Insert_Expediente(expendiente_data)
 				self.obj_consultas.query_InsertarPedido(datos)
-				self.obj_consultas.Insert_Accion(datosAccionGeneradora)
-				self.obj_consultas.Insert_Accion(datosAccion)
+				self.obj_consultas.Insert_Accion(datosAccionGeneradora)				
 				self.obj_consultas.Insert_Correlativo(datosCorrelativoGeneradora)
-				self.obj_consultas.Insert_Correlativo(datosCorrelativo)
+				for valores in datosAccion:
+					self.obj_consultas.Insert_Accion(valores)
+				for valores1 in datosCorrelativo:
+					self.obj_consultas.Insert_Correlativo(valores1)
+
 				messagebox.showinfo('Notificación','se registró correctamente!!')
 				self.Capa()
 			else:
@@ -378,7 +397,7 @@ class Documentos():
 			
 			self.llenar_tableDocumentos()
 		else:
-			messagebox.showerror('Error','No se puede derivar a la misma oficina')"""
+			messagebox.showerror('Error','No se puede derivar a la misma oficina')
 
 	def Capa(self):
 		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.7),height=int(self.height*0.88))
@@ -511,7 +530,7 @@ class Bandeja():
 		self.table_Recepcionar.heading("#6",text="Observaciones")
 		self.table_Recepcionar.column("#6",width=300,anchor="w",stretch='NO')
 		self.table_Recepcionar.heading("#7",text="Fecha")
-		self.table_Recepcionar.column("#7",width=150,anchor="w")
+		self.table_Recepcionar.column("#7",width=50,anchor="w")
 		self.table_Recepcionar.heading("#8",text="Nro Expediente")
 		self.table_Recepcionar.column("#8",width=150,anchor="w")
 		self.table_Recepcionar.heading("#9",text="Correlativo")
@@ -542,7 +561,7 @@ class Bandeja():
 		self.table_Derivar.heading("#6",text="Observaciones")
 		self.table_Derivar.column("#6",width=300,anchor="w",stretch='NO')
 		self.table_Derivar.heading("#7",text="Fecha")
-		self.table_Derivar.column("#7",width=150,anchor="w")
+		self.table_Derivar.column("#7",width=50,anchor="w")
 		self.table_Derivar.heading("#8",text="Nro Expediente")
 		self.table_Derivar.column("#8",width=150,anchor="w")
 		self.table_Derivar.heading("#9",text="Correlativo")
@@ -573,7 +592,7 @@ class Bandeja():
 		rows=self.obj_consulta.query_DocXEstado(self.oficina,1)		
 		for valor in rows:
 			rows_Oficina=self.obj_consulta.query_RetornaCodigo('OFICINA',valor.Oficina,'Id_Oficina','Oficina')
-			self.table_Derivar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,valor.Fecha,valor.Nro_Expediente,valor.nro_correlativo))
+			self.table_Derivar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,str(valor.Fecha)[:16],valor.Nro_Expediente,valor.nro_correlativo))
 
 
 	def delete_table(self,table):
@@ -581,7 +600,7 @@ class Bandeja():
 			table.delete(item)
 	def Recepcionar(self):
 		if self.table_Recepcionar.selection():
-			codigo=self.table_Recepcionar.item(self.table_Recepcionar.selection()[0])['values'][0]
+			codigo=self.table_Recepcionar.item(self.table_Recepcionar.selection()[0])['values'][0]			
 			self.obj_consulta.Update_TableEstadoAccion(codigo,1)			
 			messagebox.showinfo('Notificación','El documento se recepcionó!!')
 			self.delete_table(self.table_Recepcionar)
@@ -852,7 +871,7 @@ class Seguimiento():
 
 		for valor in rows:
 			oficina_rows=self.obj_consulta.query_RetornaCodigo('OFICINA',valor.Id_Oficina,'Id_Oficina','Oficina')			
-			self.table_Seguimiento.insert('','end',values=(valor.Razon,valor.Observacion,oficina_rows[0].Oficina,valor.Estado,valor.Fecha))
+			self.table_Seguimiento.insert('','end',values=(valor.Razon,valor.Observacion,oficina_rows[0].Oficina,valor.Estado,str(valor.Fecha)[:16]))
 
 	def llenarOficinas(self):		
 		rowsO=self.obj_consulta.query_tabla('OFICINA')
