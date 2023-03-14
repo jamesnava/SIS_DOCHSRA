@@ -129,8 +129,10 @@ class Ventana_Principal(object):
 		etiqueta_usuario.grid(row=0,column=0)
 		etiqueta_UsuarioValor=Label(self.Frame_Bottom,text=self.usuario,font=('Candara',11,'bold italic'))
 		etiqueta_UsuarioValor.grid(row=0,column=1)
-		etiqueta_UsuarioValor=Label(self.Frame_Bottom,text='Version: 1.3',font=('Candara',11,'bold italic'))
-		etiqueta_UsuarioValor.grid(row=0,column=2)			
+		etiqueta_UsuarioValor=Label(self.Frame_Bottom,text='Version: 1.4',font=('Candara',11,'bold italic'))
+		etiqueta_UsuarioValor.grid(row=0,column=2)
+		etiqueta_UsuarioValor=Label(self.Frame_Bottom,text='Author: By Jaime Navarro Cruz',font=('Candara',8,'bold italic'))
+		etiqueta_UsuarioValor.grid(row=0,column=3,padx=1,sticky='w')				
 
 	def M_GenerarDocumento(self):
 		oficina,usuario=self.Return_Office()

@@ -125,7 +125,7 @@ class Documentos():
 		etiqueta=Label(self.Frame_Docs,text="LISTA DE DOCUMENTOS",bg='#647B7B',fg="#1B3A71",font=('Comic Sans MS',18,'bold'))
 		etiqueta.grid(row=8,column=1,pady=5,columnspan=20)
 
-		self.table_Documentos=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9'),show='headings',style="model.Treeview")
+		self.table_Documentos=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9','#10','#11'),show='headings',style="model.Treeview")
 		self.table_Documentos.heading("#1",text="Nro")
 		self.table_Documentos.column("#1",width=0,anchor="w",stretch='NO')
 		self.table_Documentos.heading("#2",text="CODIGO")
@@ -143,7 +143,11 @@ class Documentos():
 		self.table_Documentos.heading("#8",text="Nro Exp.")
 		self.table_Documentos.column("#8",width=70,anchor="w",stretch='NO')
 		self.table_Documentos.heading("#9",text="Fecha")
-		self.table_Documentos.column("#9",width=100,anchor="w")
+		self.table_Documentos.column("#9",width=50,anchor="w",stretch='NO')
+		self.table_Documentos.heading("#10",text="Tipo")
+		self.table_Documentos.column("#10",width=50,anchor="w")
+		self.table_Documentos.heading("#11",text="Correlativo")
+		self.table_Documentos.column("#11",width=50,anchor="w")
 		self.table_Documentos.grid(row=9,column=0,columnspan=20,rowspan=2,pady=5)
 		self.llenar_tableDocumentos()		
 
@@ -205,7 +209,7 @@ class Documentos():
 		self.delete_table(self.table_Documentos)
 		rows=self.obj_consultas.documentos_EmitidosUpdate(2,0,self.oficinaG)
 		for valor in rows:
-			self.table_Documentos.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Nro_Pedido,valor.Razon,valor.Asunto,valor.Descripcion,valor.Oficina,valor.Nro_Expediente,valor.Fecha))
+			self.table_Documentos.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Nro_Pedido,valor.Razon,valor.Asunto,valor.Descripcion,valor.Oficina,valor.Nro_Expediente,valor.Fecha,valor.tipo,valor.nro_correlativo))
 
 	def eliminar_Documento(self):
 
@@ -515,7 +519,7 @@ class Bandeja():
 		self.Frame_Docs.grid_propagate(False)
 		etiqueta=Label(self.Frame_Docs,text='DOCUMENTOS POR RECEPCIONAR',width=int(width*0.1),font=letra,bg="#34A2DE")
 		etiqueta.place(x=0,y=10)
-		self.table_Recepcionar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9'),show='headings')				
+		self.table_Recepcionar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9','#10'),show='headings')				
 		#self.table_Recepcionar.column("#0",width=600)
 		self.table_Recepcionar.heading("#1",text="Nro")
 		self.table_Recepcionar.column("#1",width=0,anchor="w",stretch='NO')
@@ -534,7 +538,9 @@ class Bandeja():
 		self.table_Recepcionar.heading("#8",text="Nro Expediente")
 		self.table_Recepcionar.column("#8",width=150,anchor="w")
 		self.table_Recepcionar.heading("#9",text="Correlativo")
-		self.table_Recepcionar.column("#9",width=50,anchor="w")		
+		self.table_Recepcionar.column("#9",width=50,anchor="w")	
+		self.table_Recepcionar.heading("#10",text="Tipo")
+		self.table_Recepcionar.column("#10",width=50,anchor="w")	
 		self.table_Recepcionar.place(x=int(width*0.03),y=60,width=int(width*0.85),height=220)		
 		self.llenar_TablaRecepcionar()
 		btn_AccionR=ttk.Button(self.Frame_Docs,text="Recepcionar",width=20,cursor='hand2')
@@ -546,7 +552,7 @@ class Bandeja():
 		etiqueta=Label(self.Frame_Docs,text='DOCUMENTOS POR ATENDER',bg='#34A2DE',width=int(width*0.1),font=letra)
 		etiqueta.place(x=0,y=int(height*0.5))
 
-		self.table_Derivar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9'),show='headings')				
+		self.table_Derivar=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9','#10'),show='headings')				
 		
 		self.table_Derivar.heading("#1",text="Nro")
 		self.table_Derivar.column("#1",width=0,anchor="w",stretch='NO')
@@ -566,6 +572,8 @@ class Bandeja():
 		self.table_Derivar.column("#8",width=150,anchor="w")
 		self.table_Derivar.heading("#9",text="Correlativo")
 		self.table_Derivar.column("#9",width=50,anchor="w")
+		self.table_Derivar.heading("#10",text="Tipo")
+		self.table_Derivar.column("#10",width=50,anchor="w")
 
 		self.table_Derivar.place(x=int(width*0.03),y=int(height*0.55),width=int(width*0.85),height=220)
 		self.llenar_TablaDerivar()
@@ -584,7 +592,7 @@ class Bandeja():
 		rows=self.obj_consulta.query_DocXEstado(self.oficina,2)		
 		for valor in rows:
 			rows_Oficina=self.obj_consulta.query_RetornaCodigo('OFICINA',valor.Oficina,'Id_Oficina','Oficina')
-			self.table_Recepcionar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,valor.Fecha,valor.Nro_Expediente,valor.nro_correlativo))
+			self.table_Recepcionar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,valor.Fecha,valor.Nro_Expediente,valor.nro_correlativo,valor.tipo))
 
 
 	def llenar_TablaDerivar(self):
@@ -592,7 +600,7 @@ class Bandeja():
 		rows=self.obj_consulta.query_DocXEstado(self.oficina,1)		
 		for valor in rows:
 			rows_Oficina=self.obj_consulta.query_RetornaCodigo('OFICINA',valor.Oficina,'Id_Oficina','Oficina')
-			self.table_Derivar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,str(valor.Fecha)[:16],valor.Nro_Expediente,valor.nro_correlativo))
+			self.table_Derivar.insert('','end',values=(valor.Id_Accion,valor.Cod_Pedido,valor.Razon,valor.Asunto,rows_Oficina[0].Oficina,valor.Observacion,str(valor.Fecha)[:16],valor.Nro_Expediente,valor.nro_correlativo,valor.tipo))
 
 
 	def delete_table(self,table):

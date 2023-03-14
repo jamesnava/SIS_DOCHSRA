@@ -112,7 +112,7 @@ class querys(object):
 
 		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Razon,P.Asunto,P.Nro_Pedido,P.Oficina,A.Observacion,A.Fecha,EX.Nro_Expediente,T.tipo,CORR.nro_correlativo FROM ACCION AS A INNER JOIN
 		 PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente 
-		 INNER JOIN Tipo AS T ON T.Id_Tipo=EX.Id_Tipo INNER JOIN CORRELATIVO AS CORR ON CORR.AccionId=A.Id_Accion  AND A.Id_Oficina='{idoficina}' AND A.Id_Estado={estado} AND A.Manejador=0"""
+		 INNER JOIN Tipo AS T ON T.Id_Tipo=EX.Id_Tipo INNER JOIN CORRELATIVO AS CORR ON CORR.AccionId=A.Id_Accion INNER JOIN Tipo AS TT ON TT.Id_Tipo=EX.Id_Tipo AND A.Id_Oficina='{idoficina}' AND A.Id_Estado={estado} AND A.Manejador=0"""
 		 
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
@@ -145,9 +145,9 @@ class querys(object):
 
 	def documentos_EmitidosUpdate(self,Id_estado,Manejador,ASOC_OFICINA):
 		rows=[]
-		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Razon,P.Asunto,P.Descripcion,O.Oficina,EX.Nro_Expediente,P.Fecha FROM PEDIDO AS P INNER JOIN ACCION AS A
-		ON P.cod_Pedido=A.Cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente INNER JOIN OFICINA AS O ON A.Id_Oficina=O.Id_Oficina AND A.Id_Estado={Id_estado} AND
-		 A.Manejador={Manejador} AND A.ASOC_OFICINA='{ASOC_OFICINA}' AND A.Ingreso_nuevo={1}"""
+		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Razon,P.Asunto,P.Descripcion,O.Oficina,EX.Nro_Expediente,P.Fecha,TT.tipo,CORR.nro_correlativo FROM PEDIDO AS P INNER JOIN ACCION AS A
+		ON P.cod_Pedido=A.Cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente INNER JOIN CORRELATIVO AS CORR ON CORR.AccionId=A.Id_Accion INNER JOIN OFICINA AS O ON A.Id_Oficina=O.Id_Oficina INNER JOIN Tipo AS TT ON EX.Id_Tipo=TT.Id_Tipo AND A.Id_Estado={Id_estado} AND
+		 A.Manejador={Manejador} AND A.ASOC_OFICINA='{ASOC_OFICINA}' AND A.Ingreso_nuevo={1} ORDER BY CORR.nro_correlativo ASC"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
