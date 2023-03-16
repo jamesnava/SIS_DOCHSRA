@@ -9,6 +9,7 @@ import Consulta_doc
 import documentoHistorial
 import datetime
 import time
+import Users
 
 
 class Ventana_Principal(object):

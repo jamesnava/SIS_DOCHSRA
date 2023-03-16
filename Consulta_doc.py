@@ -142,6 +142,13 @@ class querys(object):
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
+	def query_allDocsArea(self,area):
+		sql=f"""SELECT P.cod_Pedido,P.Razon,P.Asunto,CORR.nro_correlativo,A.Fecha,A.ASOC_OFICINA,TT.tipo,ES.Estado FROM ACCION AS A INNER JOIN PEDIDO AS P ON A.Cod_Pedido=P.cod_Pedido INNER JOIN CORRELATIVO  AS CORR ON A.Id_Accion=CORR.AccionId
+		INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente INNER JOIN Tipo AS TT ON EX.Id_Tipo=TT.Id_Tipo INNER JOIN ESTADO AS ES ON ES.Id_Estado=A.Id_Estado  AND A.Id_Oficina='{area}' ORDER BY CORR.nro_correlativo DESC"""
+
+		self.cursor.execute(sql)
+		rows=self.cursor.fetchall()
+		return rows
 
 	def documentos_EmitidosUpdate(self,Id_estado,Manejador,ASOC_OFICINA):
 		rows=[]

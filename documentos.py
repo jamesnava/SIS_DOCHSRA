@@ -166,11 +166,15 @@ class Documentos():
 		dni=self.Entry_Razon.get()
 		url=f'https://dniruc.apisperu.com/api/v1/dni/{dni}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Im5vZG9oc3JhQGdtYWlsLmNvbSJ9.WkIBBcgkPKa--f49K61ReAErp0JbrPu9wULMOaqR9_E'
 		response=requests.get(url)
-		if response.status_code==requests.codes.ok:
-			datos=response.json()
-			data_razon=datos.get('nombres')+" "+datos.get('apellidoPaterno')+" "+datos.get("apellidoMaterno")
-			self.Entry_Razon.delete(0,'end')
-			self.Entry_Razon.insert('end',data_razon)
+		try:
+			if response.status_code==200:
+				datos=response.json()
+				data_razon=datos.get('nombres')+" "+datos.get('apellidoPaterno')+" "+datos.get("apellidoMaterno")
+				self.Entry_Razon.delete(0,'end')
+				self.Entry_Razon.insert('end',data_razon)
+		except Exception as e:
+			messagebox.showinfo('Alerta','Dni no encontrado')
+		
 	def event_razonDelete(self,event):
 		self.Entry_Razon.delete(0,'end')
 
@@ -404,7 +408,7 @@ class Documentos():
 			messagebox.showerror('Error','No se puede derivar a la misma oficina')
 
 	def Capa(self):
-		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.7),height=int(self.height*0.88))
+		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.80),height=int(self.height*0.88))
 		self.Frame_Capa.place(x=0,y=0)
 		self.Frame_Capa.grid_propagate(False)
 
