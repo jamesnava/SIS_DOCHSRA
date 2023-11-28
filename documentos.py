@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import ttk
+import ttkbootstrap as ttk
 from tkinter import messagebox
 import generales
 import Consulta_doc
@@ -19,66 +19,67 @@ class Documentos():
 		self.width=width
 		self.height=height
 		#647B7B
-		self.Frame_Docs=Frame(frame,bg='#647B7B',width=int(width*0.95),height=int(height*0.88))
-		self.Frame_Docs.place(x=int(width*0.02),y=int(self.height*0.03))
+		self.Frame_Docs=ttk.Frame(frame,width=int(width*0.98),height=int(height*0.88),relief='sunken')
+		self.Frame_Docs.place(x=0,y=0)
 		self.Frame_Docs.grid_propagate(False)
 
 		#CONSULTA
 		row_tipo=self.obj_consultas.query_tablas('Tipo')
 		lista_Tipo=[valor.tipo for valor in row_tipo]
 		etiqueta=Label(self.Frame_Docs,text='Tipo Doc.: ',bg='#647B7B',font=letra)
-		etiqueta.grid(row=0,column=0,sticky='w')
-		self.Tipo_Documento=ttk.Combobox(self.Frame_Docs,values=lista_Tipo)
+		etiqueta.grid(row=0,column=0,sticky='e')
+		
+		self.Tipo_Documento=ttk.Combobox(self.Frame_Docs,values=lista_Tipo,bootstyle='success')
 		self.Tipo_Documento.current(0)
-		self.Tipo_Documento.grid(row=0,column=1)
+		self.Tipo_Documento.grid(row=0,column=1,sticky='w')
 
 		etiqueta=Label(self.Frame_Docs,text='Multiple: ',bg='#647B7B',font=letra)
-		etiqueta.grid(row=1,column=0,sticky='w')
-		self.T_Doc=ttk.Combobox(self.Frame_Docs,values=['NO','SI'])
+		etiqueta.grid(row=1,column=0,sticky='e')
+		self.T_Doc=ttk.Combobox(self.Frame_Docs,values=['NO','SI'],bootstyle='success')
 		self.T_Doc.current(0)
 		self.T_Doc.bind("<<ComboboxSelected>>",self.event_combo)
-		self.T_Doc.grid(row=1,column=1)
+		self.T_Doc.grid(row=1,column=1,sticky='w')
 		
-		self.Entry_Codigo=Entry(self.Frame_Docs,width=40)
+		self.Entry_Codigo=ttk.Entry(self.Frame_Docs,width=40)
 		self.Entry_Codigo.insert('end',self.Generar_CodigoValido('PEDIDO','cod_Pedido'))
 		self.Entry_Codigo['state']='readonly'
 		self.Entry_Codigo.grid(row=0,column=3,ipady=3)
 		self.Entry_Codigo.grid_forget()
 
 		etiqueta=Label(self.Frame_Docs,text='Encabezado : ',bg='#647B7B',font=letra)
-		etiqueta.grid(row=0,column=4,pady=5)
-		self.Entry_NroPedido=Entry(self.Frame_Docs,width=40)	
-		self.Entry_NroPedido.grid(row=0,column=5,ipady=3,pady=5)
+		etiqueta.grid(row=0,column=4,pady=5,sticky='e')
+		self.Entry_NroPedido=ttk.Entry(self.Frame_Docs,width=40)	
+		self.Entry_NroPedido.grid(row=0,column=5,pady=5,sticky='w')
 
 		etiqueta=Label(self.Frame_Docs,text='Razon Social: ',font=letra,bg='#647B7B')
 		etiqueta.grid(row=0,column=2,sticky='e')
-		self.Entry_Razon=Entry(self.Frame_Docs,width=40)
+		self.Entry_Razon=ttk.Entry(self.Frame_Docs,width=40)
 		#EVENTO
 		self.Entry_Razon.bind("<Return>",self.event_razon)
 		self.Entry_Razon.bind("<Button-1>",self.event_razonDelete)
-		self.Entry_Razon.grid(row=0,column=3,ipady=3)
+		self.Entry_Razon.grid(row=0,column=3,sticky='w')
 
 		etiqueta=Label(self.Frame_Docs,text='Asunto: ',bg='#647B7B',font=letra)
 		etiqueta.grid(row=1,column=2,sticky='e')
-		self.Entry_Asunto=Entry(self.Frame_Docs,width=40)
-		self.Entry_Asunto.grid(row=1,column=3,ipady=3)
+		self.Entry_Asunto=ttk.Entry(self.Frame_Docs,width=40)
+		self.Entry_Asunto.grid(row=1,column=3,sticky='w')
 
 
 		etiqueta=Label(self.Frame_Docs,text='Descripcion: ',font=letra,bg='#647B7B')
-		etiqueta.grid(row=2,column=2,pady=8,padx=5,sticky='e')
-		self.Text_Descripcion=Text(self.Frame_Docs,width=60,height=2)
-		self.Text_Descripcion.grid(row=2,column=3,columnspan=10,sticky='w')
+		etiqueta.grid(row=4,column=4,pady=8,padx=5,sticky='e')
+		self.Text_Descripcion=Text(self.Frame_Docs,width=50,height=2)
+		self.Text_Descripcion.grid(row=4,column=5,columnspan=10,ipady=3,sticky='w')
 
 		#llenando el tipo
 		etiqueta=Label(self.Frame_Docs,text='Tipo: ',bg='#647B7B',font=letra)
 		etiqueta.grid(row=3,column=2,pady=8,padx=5,sticky='e')
-		self.listTipo=ttk.Combobox(self.Frame_Docs,values=['SERVICIO','BIEN','DOCUMENTO'],width=35)
+		self.listTipo=ttk.Combobox(self.Frame_Docs,values=['SERVICIO','BIEN','DOCUMENTO'],width=35,bootstyle='success')
 		self.listTipo.current(1)
-		self.listTipo.grid(row=3,column=3,ipady=3)
+		self.listTipo.grid(row=3,column=3,sticky='w')
 
 		etiqueta=Label(self.Frame_Docs,text='Fecha: ',font=letra,bg='#647B7B')
 		etiqueta.grid(row=3,column=4,pady=8,padx=5,sticky='e')
-		self.Entry_Fecha=Entry(self.Frame_Docs,width=40)
+		self.Entry_Fecha=ttk.Entry(self.Frame_Docs,width=40)
 		self.Entry_Fecha.insert('end',self.fecha_Actual.strftime("%d-%m-%Y"))
 		self.Entry_Fecha.config(state='readonly')
 		self.Entry_Fecha.grid(row=3,column=5,ipady=3)
@@ -86,26 +87,26 @@ class Documentos():
 		etiqueta=Label(self.Frame_Docs,text='Derivar: ',bg='#647B7B',font=letra)
 		etiqueta.grid(row=4,column=2,pady=8,padx=5,sticky='e')
 		self.Lista_Oficinas=Listbox(self.Frame_Docs,width=35,height=6,selectforeground='#ffffff',selectbackground="#00aa00",selectborderwidth=2,cursor='hand2')
-		self.Lista_Oficinas.grid(row=4,column=3,ipady=3,rowspan=2)
+		self.Lista_Oficinas.grid(row=4,column=3,sticky='w',rowspan=2)
 		self.llenar_Listaoficina()
 	
 		etiqueta=Label(self.Frame_Docs,text='Generado Por: ',font=letra,bg='#647B7B')
 		etiqueta.grid(row=5,column=4,pady=8,padx=5,sticky='e')
-		self.Entry_Usuario=Entry(self.Frame_Docs,width=40)
+		self.Entry_Usuario=ttk.Entry(self.Frame_Docs,width=40)
 		self.Entry_Usuario.insert('end',Usuario)
 		self.Entry_Usuario['state']='readonly'
 		self.Entry_Usuario.grid(row=5,column=5,ipady=3)
 
 		etiqueta=Label(self.Frame_Docs,text='Año: ',font=letra,bg='#647B7B')
 		etiqueta.grid(row=6,column=2,pady=8,padx=5,sticky='e')
-		self.Entry_Anio=Entry(self.Frame_Docs,width=40)
+		self.Entry_Anio=ttk.Entry(self.Frame_Docs,width=40)
 		self.Entry_Anio.insert('end',self.fecha_Actual.strftime("%Y"))
 		self.Entry_Anio['state']='readonly'
 		self.Entry_Anio.grid(row=6,column=3,ipady=3)
 
 		etiqueta=Label(self.Frame_Docs,text='Oficina: ',font=letra,bg='#647B7B')
 		etiqueta.grid(row=6,column=4,pady=8,padx=5,sticky='e')
-		self.Entry_OficinaG=Entry(self.Frame_Docs,width=40)
+		self.Entry_OficinaG=ttk.Entry(self.Frame_Docs,width=40)
 		self.Entry_OficinaG.insert('end',self.Recuperar_OficinaGeneradora(Usuario))
 		self.Entry_OficinaG['state']='readonly'
 		self.Entry_OficinaG.grid(row=6,column=5,ipady=3)		
@@ -114,7 +115,7 @@ class Documentos():
 		btn_Aceptar['command']=self.Insertar_Pedido
 		btn_Aceptar.grid(row=7,column=2,columnspan=2,padx=10,sticky='e')
 
-		btn_Cancelar=ttk.Button(self.Frame_Docs,text='Cancelar',width=20,cursor='hand2')
+		btn_Cancelar=ttk.Button(self.Frame_Docs,text='Cancelar',width=20,cursor='hand2',bootstyle='danger')
 		btn_Cancelar['command']=self.Capa
 		btn_Cancelar.grid(row=7,column=4,columnspan=2,padx=10,sticky='w')
 
@@ -125,43 +126,43 @@ class Documentos():
 		etiqueta=Label(self.Frame_Docs,text="LISTA DE DOCUMENTOS",bg='#647B7B',fg="#1B3A71",font=('Comic Sans MS',18,'bold'))
 		etiqueta.grid(row=8,column=1,pady=5,columnspan=20)
 
-		self.table_Documentos=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9','#10','#11'),show='headings',style="model.Treeview")
+		self.table_Documentos=ttk.Treeview(self.Frame_Docs,height=10,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9','#10','#11'),show='headings',style='info.Treeview')
 		self.table_Documentos.heading("#1",text="Nro")
 		self.table_Documentos.column("#1",width=0,anchor="w",stretch='NO')
 		self.table_Documentos.heading("#2",text="CODIGO")
 		self.table_Documentos.column("#2",width=0,anchor="w",stretch='NO')
 		self.table_Documentos.heading("#3",text="Encabezado")
-		self.table_Documentos.column("#3",width=200,anchor="w",stretch='NO')
+		self.table_Documentos.column("#3",width=int(width*.1),anchor="center",stretch='NO')
 		self.table_Documentos.heading("#4",text="Razon Social")
-		self.table_Documentos.column("#4",width=250,anchor="w",stretch='NO')
+		self.table_Documentos.column("#4",width=int(width*.10),anchor="center",stretch='NO')
 		self.table_Documentos.heading("#5",text="Asunto")
-		self.table_Documentos.column("#5",width=150,anchor="w",stretch='NO')
+		self.table_Documentos.column("#5",width=int(width*.15),anchor="center",stretch='NO')
 		self.table_Documentos.heading("#6",text="Descripcion")
-		self.table_Documentos.column("#6",width=300,anchor="w",stretch='NO')
+		self.table_Documentos.column("#6",width=int(width*.20),anchor="center",stretch='NO')
 		self.table_Documentos.heading("#7",text="Derivado a")
-		self.table_Documentos.column("#7",width=200,anchor="w",stretch='NO')
+		self.table_Documentos.column("#7",width=int(width*.10),anchor="center",stretch='NO')
 		self.table_Documentos.heading("#8",text="Nro Exp.")
-		self.table_Documentos.column("#8",width=70,anchor="w",stretch='NO')
+		self.table_Documentos.column("#8",width=int(width*.08),anchor="center",stretch='NO')
 		self.table_Documentos.heading("#9",text="Fecha")
-		self.table_Documentos.column("#9",width=50,anchor="w",stretch='NO')
+		self.table_Documentos.column("#9",width=int(width*.1),anchor="center",stretch='NO')
 		self.table_Documentos.heading("#10",text="Tipo")
-		self.table_Documentos.column("#10",width=50,anchor="w")
+		self.table_Documentos.column("#10",width=int(width*.06),anchor="center")
 		self.table_Documentos.heading("#11",text="Correlativo")
-		self.table_Documentos.column("#11",width=50,anchor="w")
-		self.table_Documentos.grid(row=9,column=0,columnspan=20,rowspan=2,pady=5)
+		self.table_Documentos.column("#11",width=int(width*.07),anchor="center")
+		self.table_Documentos.grid(row=9,column=0,columnspan=20,padx=10,sticky='e')
 		self.llenar_tableDocumentos()		
 
-		btn_UpDoc=ttk.Button(self.Frame_Docs,text='Eliminar',width=20,cursor="hand2")
+		btn_UpDoc=ttk.Button(self.Frame_Docs,text='Eliminar',width=20,cursor="hand2",bootstyle='danger')
 		btn_UpDoc['command']=self.eliminar_Documento
-		btn_UpDoc.grid(row=11,column=5)
+		btn_UpDoc.grid(row=10,column=5,pady=2)
 
-		btn_EditDoc=ttk.Button(self.Frame_Docs,text='Editar',width=20,cursor="hand2")
+		btn_EditDoc=ttk.Button(self.Frame_Docs,text='Editar',width=20,cursor="hand2",bootstyle='success')
 		btn_EditDoc['command']=self.Top_Editar
-		btn_EditDoc.grid(row=11,column=3)
+		btn_EditDoc.grid(row=10,column=3,pady=2)
 		
 		self.etiqueta_print=ttk.Button(self.Frame_Docs,text='Imprimir Exp.',width=20,cursor='hand2')		
 		self.etiqueta_print.bind("<Button-1>",self.print_expediente)
-		self.etiqueta_print.grid(row=11,column=4)
+		self.etiqueta_print.grid(row=10,column=4,pady=2)
 	def event_razon(self,event):
 		dni=self.Entry_Razon.get()
 		url=f'https://dniruc.apisperu.com/api/v1/dni/{dni}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJlbWFpbCI6Im5vZG9oc3JhQGdtYWlsLmNvbSJ9.WkIBBcgkPKa--f49K61ReAErp0JbrPu9wULMOaqR9_E'
@@ -189,8 +190,7 @@ class Documentos():
 		row=self.obj_consultas.query_OficinaMUser(usuario)
 		return row[0].Id_Oficina+':'+row[0].Oficina
 
-	def Generar_CodigoValido(self,tabla,columna):
-					
+	def Generar_CodigoValido(self,tabla,columna):					
 		while True:
 			codigo=generales.Generar_Codigo()
 			rows=self.obj_consultas.query_ExistenciaCodigo(tabla,codigo,columna)			
@@ -209,7 +209,6 @@ class Documentos():
 			messagebox.showinfo('Alerta',f'Error {e}')
 	
 	def llenar_tableDocumentos(self):
-
 		self.delete_table(self.table_Documentos)
 		rows=self.obj_consultas.documentos_EmitidosUpdate(2,0,self.oficinaG)
 		for valor in rows:
@@ -346,60 +345,62 @@ class Documentos():
 		datosAccionGeneradora=[nro_Accion1,codigo_Pedido,fecha,codigo_Usuario,'ninguna',1,oficina_Generadora,1,anio,oficina_Generadora,1]
 		rows_=self.obj_consultas.consulta_MaxCorrelativo(oficina_Generadora)
 		nro_corre1=0
-		if rows_[0].nro==None:
-			nro_corre1=1
+		if rows_.nro:
+			nro_corre1=rows_.nro+1
+			
 		else:
-			nro_corre1=rows_[0].nro+1
+			nro_corre1=1
+			
 
 		datosCorrelativoGeneradora=[nro_corre1,anio,oficina_Generadora,nro_Accion1]
-
-
-
-		nro_Accion2=nro_Accion1
-
-		
+		nro_Accion2=nro_Accion1		
 
 		for v in codiOficina:				
 			#reestriccion de pedido		
 			nro_Accion2=nro_Accion2+1			
 			datosAccion.append([nro_Accion2,codigo_Pedido,fecha,codigo_Usuario,'ninguna',2,v,0,anio,oficina_Generadora,1])
-			nro_corre=0
+			nro_corre=0			
 			rows=self.obj_consultas.consulta_MaxCorrelativo(v)			
-			if rows[0].nro==None:
-				nro_corre=1
+			if rows.nro:
+				nro_corre=rows.nro+1				
 			else:
-				nro_corre=rows[0].nro+1
+				nro_corre=1
+				
 				
 			datosCorrelativo.append([nro_corre,anio,v,nro_Accion2])		
-
 	
 		if not (oficina_Generadora in codiOficina):
-			if tipo=='INTERNO':				
+			if tipo=='INTERNO':
 
-				self.obj_consultas.Insert_Expediente(expendiente_data)
-				self.obj_consultas.query_InsertarPedido(datos)
-				self.obj_consultas.Insert_Accion(datosAccionGeneradora)
-				self.obj_consultas.Insert_Correlativo(datosCorrelativoGeneradora)
-				for valores in datosAccion:					
-					self.obj_consultas.Insert_Accion(valores)
-				for valores1 in datosCorrelativo:				
-					self.obj_consultas.Insert_Correlativo(valores1)
-				messagebox.showinfo('Notificación','se registró correctamente!!')
-				#print(datosCorrelativo)
-				self.Capa()		
+				if oficinasList:
+					self.obj_consultas.Insert_Expediente(expendiente_data)
+					self.obj_consultas.query_InsertarPedido(datos)
+					self.obj_consultas.Insert_Accion(datosAccionGeneradora)
+					self.obj_consultas.Insert_Correlativo(datosCorrelativoGeneradora)
+					for valores in datosAccion:					
+						self.obj_consultas.Insert_Accion(valores)
+					for valores1 in datosCorrelativo:				
+						self.obj_consultas.Insert_Correlativo(valores1)
+					messagebox.showinfo('Notificación','se registró correctamente!!')
+					#print(datosCorrelativo)
+					self.Capa()
+				else:
+					messagebox.showerror('Error al insertar','Seleccion al menos una oficina a Derivar')
 
 			elif tipo=='EXTERNO' and oficina_Generadora=='AAAAA':	
-				self.obj_consultas.Insert_Expediente(expendiente_data)
-				self.obj_consultas.query_InsertarPedido(datos)
-				self.obj_consultas.Insert_Accion(datosAccionGeneradora)				
-				self.obj_consultas.Insert_Correlativo(datosCorrelativoGeneradora)
-				for valores in datosAccion:
-					self.obj_consultas.Insert_Accion(valores)
-				for valores1 in datosCorrelativo:
-					self.obj_consultas.Insert_Correlativo(valores1)
-
-				messagebox.showinfo('Notificación','se registró correctamente!!')
-				self.Capa()
+				if oficinasList:
+					self.obj_consultas.Insert_Expediente(expendiente_data)
+					self.obj_consultas.query_InsertarPedido(datos)
+					self.obj_consultas.Insert_Accion(datosAccionGeneradora)				
+					self.obj_consultas.Insert_Correlativo(datosCorrelativoGeneradora)
+					for valores in datosAccion:
+						self.obj_consultas.Insert_Accion(valores)
+					for valores1 in datosCorrelativo:
+						self.obj_consultas.Insert_Correlativo(valores1)
+					messagebox.showinfo('Notificación','se registró correctamente!!')
+					self.Capa()
+				else:
+					messagebox.showerror("error al insertar",'Seleccion al menos una oficina a Derivar')
 			else:
 				messagebox.showerror('error!!','Verifique el tipo de documento, recuerde que documentos \n externos solo puede generara MESA DE PARTES')			
 			
@@ -408,9 +409,9 @@ class Documentos():
 			messagebox.showerror('Error','No se puede derivar a la misma oficina')
 
 	def Capa(self):
-		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.80),height=int(self.height*0.88))
+		self.Frame_Capa=Frame(self.Frame_Docs,bg='#647B7B',width=int(self.width*0.95),height=int(self.height*0.88))
 		self.Frame_Capa.place(x=0,y=0)
-		self.Frame_Capa.grid_propagate(False)
+		self.Frame_Capa.pack_propagate(False)
 
 	def delete_table(self,table):
 		for item in table.get_children():
@@ -809,6 +810,7 @@ class Bandeja():
 			obj_pdf=pdf.PDF(rows[0].Nro_Expediente,rows[0].Razon,rows[0].Asunto,rows[0].tipo)
 			if messagebox.askquestion('Atencion','Desea Imprimir el expediente'):
 				os.startfile('Expediente.pdf','print')
+				
 		else:
 			messagebox.showinfo('Atencion','Seleccione un ITEM!!')
 			
@@ -825,8 +827,8 @@ class Seguimiento():
 		self.width=width
 		self.height=height
 		#647B7B
-		self.Frame_Docs=Frame(frame,bg='#647B7B',width=int(width*0.6),height=int(height*0.6))
-		self.Frame_Docs.place(x=int(self.width*0.5)-int((self.width*0.6)/2),y=int(self.height*0.05))
+		self.Frame_Docs=Frame(frame,bg='#647B7B',width=int(width*0.95)+30,height=int(height*0.88))
+		self.Frame_Docs.place(x=0,y=0)
 		self.Frame_Docs.grid_propagate(False)
 
 		etiqueta=Label(self.Frame_Docs,text='Nro Expediente: ',font=letra,bg='#647B7B')
@@ -843,7 +845,7 @@ class Seguimiento():
 
 		etiqueta=Label(self.Frame_Docs,text='Oficina: ',bg='#647B7B',font=letra)
 		etiqueta.grid(row=0,column=5,pady=8,padx=5,sticky='e')
-		self.List_oficinas=ttk.Combobox(self.Frame_Docs,width=20)					
+		self.List_oficinas=ttk.Combobox(self.Frame_Docs,width=20,style='info.TCombobox')					
 		self.List_oficinas.grid(row=0,column=6,ipady=3)
 		self.llenarOficinas()
 		self.List_oficinas.current(1)	
@@ -860,7 +862,7 @@ class Seguimiento():
 		btn_Aceptar['command']=self.event_Seguimiento	
 		btn_Aceptar.grid(row=7,column=4,columnspan=2,padx=10,pady=10,sticky='e')
 
-		self.table_Seguimiento=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5'),show='headings')	
+		self.table_Seguimiento=ttk.Treeview(self.Frame_Docs,columns=('#1','#2','#3','#4','#5'),show='headings',style='primary.Treeview')	
 		self.table_Seguimiento.heading("#1",text="Razon")
 		self.table_Seguimiento.column("#1",width=200,anchor="w")
 		self.table_Seguimiento.heading("#2",text="Observaciones")
@@ -871,7 +873,7 @@ class Seguimiento():
 		self.table_Seguimiento.column("#4",width=80,anchor="w")		
 		self.table_Seguimiento.heading("#5",text="Fecha Movimiento")
 		self.table_Seguimiento.column("#5",width=60,anchor="w")				
-		self.table_Seguimiento.place(x=int(width*0.03),y=int(self.height*0.2),width=int(width*0.55),height=int(height*0.5))
+		self.table_Seguimiento.place(x=int(width*0.03),y=int(self.height*0.15),width=int(width*0.55),height=int(height*0.4))
 
 	def event_Seguimiento(self):
 		self.delete_table(self.table_Seguimiento)

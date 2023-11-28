@@ -1,7 +1,6 @@
 from tkinter import *
-from ttkthemes import ThemedTk
 import datetime
-from tkinter import ttk
+import ttkbootstrap  as ttk
 from tkinter import messagebox
 import GUI_User
 import documentos
@@ -10,17 +9,20 @@ import documentoHistorial
 import datetime
 import time
 import Users
+#from ttkbootstrap.constants import *
 
 
 class Ventana_Principal(object):
 	"""docstring for Ventana_Principal"""
-	def __init__(self,usuario,rol):
+	def __init__(self,usuario,rol,WindowGeneral):
+		self.root=WindowGeneral
 		self.hora=datetime.datetime.now()
 		self.usuario=usuario
 		self.letra_leyenda=('Candara',16,'bold italic')		
 	
-		self.ventana=ThemedTk(theme='arc')
+		self.ventana=Toplevel()
 		self.ventana.title('Seguimiento Documentario')
+		self.ventana.protocol("WM_DELETE_WINDOW", self.close_Root)
 		 
 		self.ventana.iconbitmap('image/libro.ico')		
 		self.height=int(self.ventana.winfo_screenheight()*0.92)
@@ -39,12 +41,13 @@ class Ventana_Principal(object):
 			self.M_Configuracion=Menu(self.Barra_Menu,tearoff=False)
 			self.M_Configuracion.add_command(label='Restablecer Contraseña',command=self.Cambiar_Contrasenia)
 			self.M_Configuracion.add_command(label='Minimizar',command=self.ventana.iconify)
-			self.M_Configuracion.add_command(label='Cerrar',command=self.ventana.destroy)
+			self.M_Configuracion.add_command(label='Cerrar',command=self.close_Root)
 			self.M_Configuracion.add_separator()		
 			self.Barra_Menu.add_cascade(label='Archivo',menu=self.M_Configuracion)
 			#creando menu configuracion
 			self.M_Usuario=Menu(self.Barra_Menu,tearoff=False)
-			self.M_Usuario.add_command(label='Agregar Usuario')
+			self.M_Usuario.add_command(label='Crear Perfil',command=self.perfiles)
+			self.M_Usuario.add_command(label='Agregar Usuario',command=self.User)
 			self.M_Usuario.add_command(label='Listar Usuario')		
 			self.M_Usuario.add_separator()		
 			self.Barra_Menu.add_cascade(label='Usuarios',menu=self.M_Usuario)
@@ -70,7 +73,7 @@ class Ventana_Principal(object):
 			self.M_Configuracion=Menu(self.Barra_Menu,tearoff=False)
 			self.M_Configuracion.add_command(label='Restablecer Contraseña',command=self.Cambiar_Contrasenia)
 			self.M_Configuracion.add_command(label='Minimizar',command=self.ventana.iconify)
-			self.M_Configuracion.add_command(label='Cerrar',command=self.ventana.destroy)
+			self.M_Configuracion.add_command(label='Cerrar',command=self.close_Root)
 			self.M_Configuracion.add_separator()		
 			self.Barra_Menu.add_cascade(label='Archivo',menu=self.M_Configuracion)	
 
@@ -94,7 +97,7 @@ class Ventana_Principal(object):
 			self.M_Configuracion=Menu(self.Barra_Menu,tearoff=False)
 			self.M_Configuracion.add_command(label='Restablecer Contraseña',command=self.Cambiar_Contrasenia)
 			self.M_Configuracion.add_command(label='Minimizar',command=self.ventana.iconify)
-			self.M_Configuracion.add_command(label='Cerrar',command=self.ventana.destroy)
+			self.M_Configuracion.add_command(label='Cerrar',command=self.close_Root)
 			self.M_Configuracion.add_separator()		
 			self.Barra_Menu.add_cascade(label='Archivo',menu=self.M_Configuracion)	
 
@@ -116,7 +119,14 @@ class Ventana_Principal(object):
 			self.agregar_bottom()
 		# USUARIOS
 
-		
+	def perfiles(self):
+		from usuarios.usuarios import Usuario
+		obj_usuarios=Usuario()
+		obj_usuarios.Top_Perfiles()
+
+	def close_Root(self):
+		self.ventana.destroy()
+		self.root.destroy()
 
 	def Return_Office(self):
 		obj_consulta=Consulta_doc.querys()
@@ -136,38 +146,41 @@ class Ventana_Principal(object):
 		etiqueta_UsuarioValor.grid(row=0,column=3,padx=1,sticky='w')				
 
 	def M_GenerarDocumento(self):
-		oficina,usuario=self.Return_Office()
-		#647B7B
-		self.Frame_Documentos=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
-		self.Frame_Documentos.place(x=10,y=10)
-		self.Frame_Documentos.grid_propagate(False)
+		oficina,usuario=self.Return_Office()		
 		obj_Documentos=documentos.Documentos(oficina,usuario)
-		obj_Documentos.Generar_Documentos(self.Frame_Documentos,self.width,self.height,self.usuario)
+		obj_Documentos.Generar_Documentos(self.ventana,self.width,self.height,self.usuario)
 
 	def bandeja_Entrada(self):
-		oficina,usuario=self.Return_Office()
-		#647B7B
-		self.Frame_Bandeja=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
-		self.Frame_Bandeja.place(x=10,y=10)
-		self.Frame_Bandeja.grid_propagate(False)
+		oficina,usuario=self.Return_Office()		
+		#self.Frame_Bandeja=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
+		#self.Frame_Bandeja.place(x=10,y=10)
+		#self.Frame_Bandeja.grid_propagate(False)
 		obj_Documentos=documentos.Bandeja(oficina,usuario,self.ventana)
-		obj_Documentos.BandejaEntrada(self.Frame_Bandeja,self.width,self.height)
+		obj_Documentos.BandejaEntrada(self.ventana,self.width,self.height)
 
 	def Seguimiento_Documentario(self):
 		oficina,usuario=self.Return_Office()
-		self.Frame_Bandeja=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
-		self.Frame_Bandeja.place(x=10,y=10)
-		self.Frame_Bandeja.grid_propagate(False)
+		#self.Frame_Bandeja=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=5)
+		#self.Frame_Bandeja.place(x=10,y=10)
+		#self.Frame_Bandeja.grid_propagate(False)
 		obj_Documentos=documentos.Seguimiento(oficina,usuario)
-		obj_Documentos.Seguimiento(self.Frame_Bandeja,self.width,self.height)
+		obj_Documentos.Seguimiento(self.ventana,self.width,self.height)
 
 	def Historial_Documentario(self):
 		oficina,usuario=self.Return_Office()
 		self.Frame_Historial=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=0)
-		self.Frame_Historial.place(x=10,y=10)
+		self.Frame_Historial.place(x=0,y=0)
 		self.Frame_Historial.grid_propagate(False)
 		obj_HistorialDoc=documentoHistorial.DocumentoAccion(oficina,usuario)
 		obj_HistorialDoc.Top_Menu(self.Frame_Historial,self.width,self.height)
+
+	def User(self):
+		oficina,usuario=self.Return_Office()
+		self.Frame_Users=Frame(self.ventana,bg='#647B7B',width=int(self.width*0.99),height=int(self.height*0.93),highlightthickness=0)
+		self.Frame_Users.place(x=0,y=0)
+		self.Frame_Users.grid_propagate(False)
+		#obj_HistorialDoc=Users.DocumentoAccion(oficina,usuario)
+		#obj_HistorialDoc.Top_Menu(self.Frame_Historial,self.width,self.height)
 
 	def Cambiar_Contrasenia(self):
 
@@ -179,18 +192,18 @@ class Ventana_Principal(object):
 		Top_Contrasenia.title("Cambiar Contraseña")
 		etiqueta=Label(Top_Contrasenia,text='Contraseña Actual')
 		etiqueta.grid(row=1,column=1,pady=10,padx=10)
-		text_contraActual=Entry(Top_Contrasenia,show='*')
+		text_contraActual=ttk.Entry(Top_Contrasenia,show='*')
 		text_contraActual.grid(row=1,column=2,pady=10,padx=10)
 		etiqueta=Label(Top_Contrasenia,text='Contraseña Nueva')
 		etiqueta.grid(row=2,column=1,pady=10,padx=10)
-		text_contraNueva=Entry(Top_Contrasenia,show='*')
+		text_contraNueva=ttk.Entry(Top_Contrasenia,show='*')
 		text_contraNueva.grid(row=2,column=2,pady=10,padx=10)
 
-		btn_AceptarC=Button(Top_Contrasenia,text='Aceptar')
+		btn_AceptarC=ttk.Button(Top_Contrasenia,text='Aceptar',bootstyle="success")
 		btn_AceptarC['command']=lambda :self.UpdatePass(self.usuario,text_contraActual.get(),text_contraNueva.get(),Top_Contrasenia)
 		btn_AceptarC.grid(row=3,column=1,pady=10,padx=10)
 
-		btn_CancelarC=Button(Top_Contrasenia,text='Cancelar')
+		btn_CancelarC=ttk.Button(Top_Contrasenia,text='Cancelar',bootstyle="danger")
 		btn_CancelarC['command']=Top_Contrasenia.destroy
 		btn_CancelarC.grid(row=3,column=2,pady=10,padx=10)
 		

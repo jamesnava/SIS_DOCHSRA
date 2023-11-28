@@ -21,5 +21,6 @@ class Conexion(object):
 			messagebox.showinfo('Notificación','No pudo conectarse al servidor SISGALENPLUS')		
 		
 	def close_conection(self):
+		
 		self.conn.close()
 

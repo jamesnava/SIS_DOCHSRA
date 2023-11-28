@@ -5,7 +5,6 @@ class querys(object):
 		obj_conectar=conect_bd.Conexion()
 		obj_conectar.ejecutar_conn()
 		self.cursor=obj_conectar.get_cursor()
-	
 		
 	def query_User(self,usuario,contra):
 		rows=[]
@@ -154,7 +153,7 @@ class querys(object):
 		rows=[]
 		sql=f"""SELECT A.Id_Accion,A.Cod_Pedido,P.Nro_Pedido,P.Razon,P.Asunto,P.Descripcion,O.Oficina,EX.Nro_Expediente,P.Fecha,TT.tipo,CORR.nro_correlativo FROM PEDIDO AS P INNER JOIN ACCION AS A
 		ON P.cod_Pedido=A.Cod_Pedido INNER JOIN EXPEDIENTE AS EX ON P.Id_Expediente=EX.Id_Expediente INNER JOIN CORRELATIVO AS CORR ON CORR.AccionId=A.Id_Accion INNER JOIN OFICINA AS O ON A.Id_Oficina=O.Id_Oficina INNER JOIN Tipo AS TT ON EX.Id_Tipo=TT.Id_Tipo AND A.Id_Estado={Id_estado} AND
-		 A.Manejador={Manejador} AND A.ASOC_OFICINA='{ASOC_OFICINA}' AND A.Ingreso_nuevo={1} ORDER BY CORR.nro_correlativo ASC"""
+		 A.Manejador={Manejador} AND A.ASOC_OFICINA='{ASOC_OFICINA}' AND A.Ingreso_nuevo={1} ORDER BY CORR.nro_correlativo DESC"""
 		self.cursor.execute(sql)
 		rows=self.cursor.fetchall()
 		return rows
@@ -196,11 +195,21 @@ class querys(object):
 		return rows
 
 	def consulta_MaxCorrelativo(self,Oficina):
-		rows=[]
-		sql=f"""SELECT MAX(nro_correlativo) as nro FROM CORRELATIVO WHERE anio=(SELECT YEAR(GETDATE())) AND oficina='{Oficina}'"""
-		self.cursor.execute(sql)
-		rows=self.cursor.fetchall()
-		return rows
+		obj_conectar=conect_bd.Conexion()
+		obj_conectar.ejecutar_conn()
+		cursor=obj_conectar.get_cursor()
+
+		try:
+			rows=[]
+			sql=f"""SELECT MAX(nro_correlativo) as nro FROM CORRELATIVO WHERE anio=(SELECT YEAR(GETDATE())) AND oficina='{Oficina}'"""
+			cursor.execute(sql)
+			rows=cursor.fetchone()
+			return rows if rows else None
+			cursor.close()
+		finally:
+			obj_conectar.close_conection()
+			
+		
 
 	def consulta_PedidoPdf(self,codigo):
 		rows=[]

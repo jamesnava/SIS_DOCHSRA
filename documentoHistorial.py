@@ -16,8 +16,8 @@ class DocumentoAccion(object):
 		self.width=width
 		self.height=height
 		letra=('Comic Sans MS',24,'bold')
-		frame_left=Frame(frame,width=int(width*0.15),height=int(height*0.93),bg='#181F50')		
-		frame_left.pack(side='left')
+		frame_left=Frame(frame,width=int(width*0.15),height=int(height*0.88),bg='#181F50')		
+		frame_left.place(x=0,y=0)
 		self.Lista_Menu=Listbox(frame_left,width=int(width*0.1),height=int(height*0.059),cursor='hand2')
 		items=('Historial','Rechazados','Atendidos')
 		self.Lista_Menu.insert(0,*items)
@@ -25,18 +25,17 @@ class DocumentoAccion(object):
 		self.Lista_Menu.bind("<<ListboxSelect>>",self.Frame_evento)
 		
 
-		self.frame_main=Frame(frame,width=int(width*0.83),height=int(height*0.93),bg='#C2C2C1')
-		self.frame_main.pack(side='right',padx=int(width*0.009))
-		label=Label(self.frame_main,text='EN DESARROLLO...')
-		label.place(x=5,y=200)
+		self.frame_main=ttk.Frame(frame,width=int(width*0.83),height=int(height*0.88),relief='sunken')
+		self.frame_main.place(x=200,y=0)
+		
 	def frame_Historial(self):
-		label=Label(self.frameH,text='HISTORIAL DE DOCUMENTOS DEL AREA',font=self.letra_titulo,fg='#332275',bg='#C2C2C1')
+		label=ttk.Label(self.frameH,text='HISTORIAL DE DOCUMENTOS DEL AREA',font=self.letra_titulo,bootstyle='inverse-secondary')
 		label.place(x=int(self.width*0.3),y=10)
 
-		label=Label(self.frameH,text='Search: ',fg='#332275',bg='#C2C2C1',font=('Segoe Script',12,'bold'))
+		label=ttk.Label(self.frameH,text='Search: ',font=('Segoe Script',12,'bold'),bootstyle='inverse-secondary')
 		label.place(x=int(self.width*0.03),y=50)
 
-		self.table_Historial=ttk.Treeview(self.frameH,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9'),show='headings')		
+		self.table_Historial=ttk.Treeview(self.frameH,columns=('#1','#2','#3','#4','#5','#6','#7','#8','#9'),show='headings',style='success.Treeview')		
 		self.table_Historial.heading("#1",text="Nro")
 		self.table_Historial.column("#1",width=0,anchor="w",stretch='NO')
 		self.table_Historial.heading("#2",text="CODIGO")
@@ -60,7 +59,7 @@ class DocumentoAccion(object):
 		entry_search=ttk.Entry(self.frameH,width=50)
 		entry_search.place(x=int(self.width*0.08),y=50)
 
-		etiqueta_Exportar=Label(self.frameH,text="Exportar",bg='#C2C2C1',fg='red',cursor='hand2')
+		etiqueta_Exportar=Label(self.frameH,text="Exportar",bg='#647B7B',fg='red',cursor='hand2')
 		etiqueta_Exportar.place(x=int(self.width*0.03),y=500)
 	def llenar_Table(self):
 		area=self.oficina
@@ -74,11 +73,11 @@ class DocumentoAccion(object):
 		selection_=self.Lista_Menu.curselection()
 		selection=self.Lista_Menu.get(selection_)
 		if selection=='Historial':
-			self.frameH=Frame(self.frame_main,width=int(self.width*0.83),height=int(self.height*0.90),bg='#C2C2C1')		
+			self.frameH=ttk.Frame(self.frame_main,width=int(self.width*0.83),height=int(self.height*0.90),relief='sunken',style='secondary.TFrame')		
 			self.frame_Historial()
 			self.frameH.place(x=0,y=0)
 		if selection=='Rechazados':
-			frameR=Frame(self.frame_main,width=int(self.width*0.83),height=int(self.height*0.90),bg='#C2C2C1')		
+			frameR=Frame(self.frame_main,width=int(self.width*0.83),height=int(self.height*0.90),bg='#647B7B')		
 			frameR.place(x=0,y=0)
 			
 
